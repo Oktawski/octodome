@@ -2,10 +2,8 @@ package userpres
 
 import (
 	"net/http"
+	corehttp "octodome/internal/core/http"
 	user "octodome/internal/user/application"
-	"strconv"
-
-	"github.com/gin-gonic/gin"
 )
 
 type UserController struct {
@@ -16,38 +14,34 @@ func NewUserController(handler user.UserHandler) *UserController {
 	return &UserController{Handler: handler}
 }
 
-func (ctrl *UserController) GetUser(c *gin.Context) {
-	var idStr string = c.Param("id")
-
-	idInt, err := strconv.Atoi(idStr)
-	if err != nil || idInt < 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+func (ctrl *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
+	id, err := corehttp.GetPathParam[int](r, "id")
+	if err != nil || id < 0 {
+		corehttp.WriteJSONError(w, http.StatusBadRequest, "Invalid user ID")
 		return
 	}
 
-	id := uint(idInt)
-
-	user, err := ctrl.Handler.GetUserByID(id)
+	u, err := ctrl.Handler.GetUserByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		corehttp.WriteJSONError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
-	c.JSON(http.StatusOK, user)
+	corehttp.WriteJSON(w, http.StatusOK, u)
 }
 
-func (ctrl *UserController) CreateUser(c *gin.Context) {
-	var user user.UserCreateRequest
+func (ctrl *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
+	var req user.UserCreateRequest
 
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if err := corehttp.ParseJSON(r, &req); err != nil {
+		corehttp.WriteJSONError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := ctrl.Handler.CreateUser(&user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	if err := ctrl.Handler.CreateUser(&req); err != nil {
+		corehttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	c.JSON(http.StatusCreated, user)
+	corehttp.WriteJSON(w, http.StatusCreated, req)
 }

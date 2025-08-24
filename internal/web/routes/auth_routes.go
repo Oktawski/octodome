@@ -3,12 +3,11 @@ package routes
 import (
 	authpres "octodome/internal/auth/presentation"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 )
 
-func RegisterAuthRoutes(r *gin.Engine, controller *authpres.AuthController) {
-	userGroup := r.Group("/auth")
-	{
-		userGroup.POST("", controller.Authenticate)
-	}
+func RegisterAuthRoutes(r chi.Router, controller *authpres.AuthController) {
+	r.Route("/auth", func(auth chi.Router) {
+		auth.Post("/", controller.Authenticate)
+	})
 }

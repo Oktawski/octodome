@@ -2,10 +2,12 @@ package web
 
 import (
 	"log"
+	"net/http"
 	auth "octodome/internal/auth/application"
 	authinfra "octodome/internal/auth/infrastructure"
 	authpres "octodome/internal/auth/presentation"
-	equipment "octodome/internal/equipment/application"
+	eqhandler "octodome/internal/equipment/application/handler"
+	eqdom "octodome/internal/equipment/domain"
 	eqinfra "octodome/internal/equipment/infrastructure"
 	eqpres "octodome/internal/equipment/presentation"
 	user "octodome/internal/user/application"
@@ -14,15 +16,15 @@ import (
 	userpres "octodome/internal/user/presentation"
 	"octodome/internal/web/routes"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 func StartServer() {
-	r := gin.Default()
+	r := chi.NewRouter()
 
-	dsn := "host=localhost user=user password=pass123 dbname=octome_db port=5432 sslmode=disable"
+	dsn := "host=localhost user=sa password=pass123 dbname=octodome_db port=5432 sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		log.Fatal("Failed to connect to database: ", err)
@@ -37,7 +39,7 @@ func StartServer() {
 	routes.RegisterAuthRoutes(r, createAuthController(userRepo))
 	routes.RegisterEquipmentRoutes(r, createEquipmentController(db))
 
-	r.Run(":8989")
+	http.ListenAndServe(":8989", r)
 }
 
 func createUserController(userRepo userdom.UserRepository) *userpres.UserController {
@@ -54,10 +56,11 @@ func createAuthController(userRepo auth.AuthRepository) *authpres.AuthController
 }
 
 func createEquipmentController(db *gorm.DB) *eqpres.EquipmentController {
-	eqRepo := eqinfra.NewPgEquipmentRepository(db)
+	eqTypeRepo := eqinfra.NewPgEquipmentTypeRepository(db)
+	eqTypeValidator := eqdom.NewEquipmentTypeValidator(eqTypeRepo)
 
-	eqHandler := equipment.NewEquipmentHandler()
-	eqTypeHandler := equipment.NewEquipmentTypeHandler(eqRepo)
+	eqHandler := eqhandler.NewEquipmentHandler()
+	eqTypeHandler := eqhandler.NewEquipmentTypeHandler(eqTypeValidator, eqTypeRepo)
 
 	return eqpres.NewEquipmentController(eqHandler, eqTypeHandler)
 }

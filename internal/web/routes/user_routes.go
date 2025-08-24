@@ -4,18 +4,16 @@ import (
 	userpres "octodome/internal/user/presentation"
 	"octodome/internal/web/middleware"
 
-	"github.com/gin-gonic/gin"
+	"github.com/go-chi/chi/v5"
 )
 
-func RegisterUserRoutes(r *gin.Engine, controller *userpres.UserController) {
-	userGroup := r.Group("/users")
-	{
-		userGroup.POST("", controller.CreateUser)
-	}
+func RegisterUserRoutes(r chi.Router, controller *userpres.UserController) {
+	r.Route("/user", func(user chi.Router) {
+		user.Post("/", controller.CreateUser)
 
-	userProtectedGroup := r.Group("/users")
-	userProtectedGroup.Use(middleware.JwtAuthMiddleware())
-	{
-		userProtectedGroup.GET("/:id", controller.GetUser)
-	}
+		user.Group(func(protected chi.Router) {
+			protected.Use(middleware.JwtAuthMiddleware)
+			protected.Get("/{id:[0-9]+}", controller.GetUser)
+		})
+	})
 }
