@@ -6,3 +6,9 @@ type User struct {
 	Email        string
 	PasswordHash string
 }
+
+type UserDTO struct {
+	ID       uint
+	Username string
+	Email    string
+}

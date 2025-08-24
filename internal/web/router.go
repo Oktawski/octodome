@@ -7,10 +7,11 @@ import (
 	authinfra "octodome/internal/auth/infrastructure"
 	authpres "octodome/internal/auth/presentation"
 	eqhandler "octodome/internal/equipment/application/handler"
+	"octodome/internal/equipment/application/handler/eqtypehandler"
 	eqdom "octodome/internal/equipment/domain"
 	eqinfra "octodome/internal/equipment/infrastructure"
 	eqpres "octodome/internal/equipment/presentation"
-	user "octodome/internal/user/application"
+	userhandler "octodome/internal/user/application/user_handler"
 	userdom "octodome/internal/user/domain"
 	userinfra "octodome/internal/user/infrastructure"
 	userpres "octodome/internal/user/presentation"
@@ -43,14 +44,15 @@ func StartServer() {
 }
 
 func createUserController(userRepo userdom.UserRepository) *userpres.UserController {
-	userHandler := user.NewUserHandler(userRepo)
+	userCreateHandler := userhandler.NewUserCreateHandler(userRepo)
+	userGetByID := userhandler.NewUserGetByIDHandler(userRepo)
 
-	return userpres.NewUserController(userHandler)
+	return userpres.NewUserController(userCreateHandler, userGetByID)
 }
 
 func createAuthController(userRepo auth.AuthRepository) *authpres.AuthController {
 	tokenGenerator := authinfra.NewJwtTokenGenerator()
-	authHandler := auth.NewAuthHandler(userRepo, tokenGenerator)
+	authHandler := auth.NewAuthenticateHandler(userRepo, tokenGenerator)
 
 	return authpres.NewAuthController(authHandler)
 }
@@ -60,7 +62,15 @@ func createEquipmentController(db *gorm.DB) *eqpres.EquipmentController {
 	eqTypeValidator := eqdom.NewEquipmentTypeValidator(eqTypeRepo)
 
 	eqHandler := eqhandler.NewEquipmentHandler()
-	eqTypeHandler := eqhandler.NewEquipmentTypeHandler(eqTypeValidator, eqTypeRepo)
+	eqTypeCreateHandler := eqtypehandler.NewCreateHandler(eqTypeValidator, eqTypeRepo)
+	eqTypeDeleteHandler := eqtypehandler.NewDeleteHandler(eqTypeValidator, eqTypeRepo)
+	eqTypeGetByIDHandler := eqtypehandler.NewGetByIDHandler(eqTypeValidator, eqTypeRepo)
+	eqTypeGetListHandler := eqtypehandler.NewGetListHandler(eqTypeValidator, eqTypeRepo)
 
-	return eqpres.NewEquipmentController(eqHandler, eqTypeHandler)
+	return eqpres.NewEquipmentController(
+		eqHandler,
+		eqTypeCreateHandler,
+		eqTypeDeleteHandler,
+		eqTypeGetByIDHandler,
+		eqTypeGetListHandler)
 }

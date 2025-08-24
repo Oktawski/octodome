@@ -1,11 +1,8 @@
 package eqhandler
 
-type EquipmentHandler interface {
+type EquipmentHandler struct {
 }
 
-type equipmentHandler struct {
-}
-
-func NewEquipmentHandler() *equipmentHandler {
-	return &equipmentHandler{}
+func NewEquipmentHandler() *EquipmentHandler {
+	return &EquipmentHandler{}
 }

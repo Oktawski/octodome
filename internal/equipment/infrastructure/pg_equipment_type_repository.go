@@ -19,7 +19,7 @@ func NewPgEquipmentTypeRepository(db *gorm.DB) *pgEquipmentTypeRepository {
 func (r *pgEquipmentTypeRepository) GetEquipmentTypes(
 	page int,
 	pageSize int,
-	user authdom.UserContext) ([]eqdom.EquipmentType, error) {
+	user authdom.UserContext) ([]eqdom.EquipmentType, int64, error) {
 
 	var eqTypes []equipmentType
 	if dbError := r.db.
@@ -27,7 +27,7 @@ func (r *pgEquipmentTypeRepository) GetEquipmentTypes(
 		Limit(pageSize).
 		Where("user_id = ?", user.ID).
 		Find(&eqTypes); dbError.Error != nil {
-		return nil, dbError.Error
+		return nil, 0, dbError.Error
 	}
 
 	domEqTypes := make([]eqdom.EquipmentType, len(eqTypes))
@@ -38,7 +38,15 @@ func (r *pgEquipmentTypeRepository) GetEquipmentTypes(
 		}
 	}
 
-	return domEqTypes, nil
+	var totalCount int64
+	if err := r.db.
+		Model(&equipmentType{}).
+		Where("user_id = ?", user.ID).
+		Count(&totalCount).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return domEqTypes, totalCount, nil
 }
 
 func (r *pgEquipmentTypeRepository) GetEquipmentType(

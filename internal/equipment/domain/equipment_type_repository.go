@@ -5,7 +5,7 @@ import (
 )
 
 type EquipmentTypeRepository interface {
-	GetEquipmentTypes(page int, pageSize int, user authdom.UserContext) ([]EquipmentType, error)
+	GetEquipmentTypes(page int, pageSize int, user authdom.UserContext) ([]EquipmentType, int64, error)
 	GetEquipmentType(id uint, user authdom.UserContext) (*EquipmentType, error)
 	CreateType(eq *EquipmentType) error
 	DeleteEquipmentType(id uint, user authdom.UserContext) error

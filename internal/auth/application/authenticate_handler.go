@@ -7,29 +7,29 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type AuthHandler interface {
-	Authenticate(authReq *AuthenticateRequest) (string, error)
+type AuthenticateHandler interface {
+	Handle(authReq *AuthenticateCommand) (string, error)
 }
 
 type AuthRepository interface {
 	GetUserByUsername(username string) (user *userdom.User, err error)
 }
 
-type authHandler struct {
+type authenticateHandler struct {
 	userRepository AuthRepository
 	tokenGenerator authdom.AuthTokenGenerator
 }
 
-func NewAuthHandler(
+func NewAuthenticateHandler(
 	repository AuthRepository,
-	tokenGenerator authdom.AuthTokenGenerator) AuthHandler {
-	return &authHandler{
+	tokenGenerator authdom.AuthTokenGenerator) AuthenticateHandler {
+	return &authenticateHandler{
 		userRepository: repository,
 		tokenGenerator: tokenGenerator,
 	}
 }
 
-func (handler *authHandler) Authenticate(request *AuthenticateRequest) (string, error) {
+func (handler *authenticateHandler) Handle(request *AuthenticateCommand) (string, error) {
 	user, err := handler.userRepository.GetUserByUsername(request.Username)
 	if err != nil {
 		return "", err

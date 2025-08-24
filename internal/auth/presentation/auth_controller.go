@@ -7,22 +7,21 @@ import (
 )
 
 type AuthController struct {
-	Handler auth.AuthHandler
+	AuthenticateHandler auth.AuthenticateHandler
 }
 
-func NewAuthController(handler auth.AuthHandler) *AuthController {
-	return &AuthController{Handler: handler}
+func NewAuthController(handler auth.AuthenticateHandler) *AuthController {
+	return &AuthController{AuthenticateHandler: handler}
 }
 
 func (ctrl *AuthController) Authenticate(w http.ResponseWriter, r *http.Request) {
-	var authReq auth.AuthenticateRequest
-
-	if err := corehttp.ParseJSON(r, &authReq); err != nil {
+	var authCommand auth.AuthenticateCommand
+	if err := corehttp.ParseJSON(r, &authCommand); err != nil {
 		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
-	token, err := ctrl.Handler.Authenticate(&authReq)
+	token, err := ctrl.AuthenticateHandler.Handle(&authCommand)
 	if err != nil {
 		corehttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
 		return

@@ -3,15 +3,23 @@ package userpres
 import (
 	"net/http"
 	corehttp "octodome/internal/core/http"
-	user "octodome/internal/user/application"
+	usercommand "octodome/internal/user/application/command"
+	userquery "octodome/internal/user/application/query"
+	userhandler "octodome/internal/user/application/user_handler"
 )
 
 type UserController struct {
-	Handler user.UserHandler
+	userCreateHandler  *userhandler.CreateHandler
+	userGetByIDHandler *userhandler.GetByIDHandler
 }
 
-func NewUserController(handler user.UserHandler) *UserController {
-	return &UserController{Handler: handler}
+func NewUserController(
+	userCreate *userhandler.CreateHandler,
+	userGetByID *userhandler.GetByIDHandler) *UserController {
+	return &UserController{
+		userCreateHandler:  userCreate,
+		userGetByIDHandler: userGetByID,
+	}
 }
 
 func (ctrl *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
@@ -21,27 +29,28 @@ func (ctrl *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := ctrl.Handler.GetUserByID(uint(id))
+	query := userquery.GetByID{ID: uint(id)}
+	user, err := ctrl.userGetByIDHandler.Handle(query)
 	if err != nil {
 		corehttp.WriteJSONError(w, http.StatusNotFound, "User not found")
 		return
 	}
 
-	corehttp.WriteJSON(w, http.StatusOK, u)
+	corehttp.WriteJSON(w, http.StatusOK, user)
 }
 
 func (ctrl *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var req user.UserCreateRequest
-
-	if err := corehttp.ParseJSON(r, &req); err != nil {
+	var command usercommand.Create
+	if err := corehttp.ParseJSON(r, &command); err != nil {
 		corehttp.WriteJSONError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := ctrl.Handler.CreateUser(&req); err != nil {
+	if err := ctrl.userCreateHandler.Handle(command); err != nil {
 		corehttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	corehttp.WriteJSON(w, http.StatusCreated, req)
+	// TODO: extend by ID
+	corehttp.WriteJSON(w, http.StatusCreated, command)
 }

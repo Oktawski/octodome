@@ -1,6 +1,6 @@
 package auth
 
-type AuthenticateRequest struct {
+type AuthenticateCommand struct {
 	Username string
 	Password string
 }

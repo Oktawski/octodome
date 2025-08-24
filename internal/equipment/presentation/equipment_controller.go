@@ -5,37 +5,31 @@ import (
 	corehttp "octodome/internal/core/http"
 	eqcommand "octodome/internal/equipment/application/command"
 	eqhandler "octodome/internal/equipment/application/handler"
+	"octodome/internal/equipment/application/handler/eqtypehandler"
 	eqquery "octodome/internal/equipment/application/query"
 )
 
-// package equipment
-
-// import eqdom "octodome/internal/equipment/domain"
-
-// type EquipmentTypeGetResponse struct {
-// 	ID   uint
-// 	Name string
-// }
-
-// func FromDomain(d *eqdom.EquipmentType) *EquipmentTypeGetResponse {
-// 	return &EquipmentTypeGetResponse{
-// 		ID:   d.ID,
-// 		Name: d.Name,
-// 	}
-// }
-
 type EquipmentController struct {
-	eqHandler     eqhandler.EquipmentHandler
-	eqTypeHandler eqhandler.EquipmentTypeHandler
+	eqHandler            *eqhandler.EquipmentHandler
+	eqTypeCreateHandler  *eqtypehandler.CreateHandler
+	eqTypeDeleteHandler  *eqtypehandler.DeleteHandler
+	eqTypeGetByIDHandler *eqtypehandler.GetByIDHandler
+	eqTypeGetListHandler *eqtypehandler.GetListHandler
 }
 
 func NewEquipmentController(
-	eqHandler eqhandler.EquipmentHandler,
-	eqTypeHandler eqhandler.EquipmentTypeHandler) *EquipmentController {
+	eqHandler *eqhandler.EquipmentHandler,
+	CreateHandler *eqtypehandler.CreateHandler,
+	DeleteHandler *eqtypehandler.DeleteHandler,
+	GetByIDHandler *eqtypehandler.GetByIDHandler,
+	getListHandler *eqtypehandler.GetListHandler) *EquipmentController {
 
 	return &EquipmentController{
-		eqHandler:     eqHandler,
-		eqTypeHandler: eqTypeHandler,
+		eqHandler:            eqHandler,
+		eqTypeCreateHandler:  CreateHandler,
+		eqTypeDeleteHandler:  DeleteHandler,
+		eqTypeGetByIDHandler: GetByIDHandler,
+		eqTypeGetListHandler: getListHandler,
 	}
 }
 
@@ -45,14 +39,15 @@ func (ctrl *EquipmentController) GetEquipmentTypes(w http.ResponseWriter, r *htt
 	page := corehttp.GetQueryParamOrDefault(r, "page", 1)
 	pageSize := corehttp.GetQueryParamOrDefault(r, "pageSize", 100)
 
-	query := eqquery.GetListQuery{Page: page, PageSize: pageSize, User: *user}
-	eqTypes, error := ctrl.eqTypeHandler.GetEquipmentTypes(query)
+	query := eqquery.GetList{Page: page, PageSize: pageSize, User: *user}
+	eqTypes, totalCount, error := ctrl.eqTypeGetListHandler.Handle(query)
 	if error != nil {
 		corehttp.WriteJSONError(w, http.StatusNotFound, "could not fetch equipment types")
 		return
 	}
 
-	corehttp.WriteJSON(w, http.StatusOK, eqTypes)
+	response := &GetEquipmentTypesResponse{EqTypes: eqTypes, TotalCount: totalCount}
+	corehttp.WriteJSON(w, http.StatusOK, response)
 }
 
 func (ctrl *EquipmentController) GetEquipmentType(w http.ResponseWriter, r *http.Request) {
@@ -63,8 +58,8 @@ func (ctrl *EquipmentController) GetEquipmentType(w http.ResponseWriter, r *http
 		return
 	}
 
-	query := eqquery.GetQuery{ID: uint(id), User: *user}
-	eqType, err := ctrl.eqTypeHandler.GetEquipmentType(query)
+	query := eqquery.GetByID{ID: uint(id), User: *user}
+	eqType, err := ctrl.eqTypeGetByIDHandler.Handle(query)
 	if err != nil {
 		corehttp.WriteJSONError(w, http.StatusBadRequest, "equipment type not found")
 		return
@@ -83,7 +78,7 @@ func (ctrl *EquipmentController) CreateEquipmentType(w http.ResponseWriter, r *h
 	}
 
 	command := eqcommand.CreateCommand{Name: dto.Name, User: *user}
-	if err := ctrl.eqTypeHandler.CreateType(command); err != nil {
+	if err := ctrl.eqTypeCreateHandler.Handle(command); err != nil {
 		corehttp.WriteJSONError(w, http.StatusConflict, err.Error())
 		return
 	}
@@ -102,7 +97,7 @@ func (ctrl *EquipmentController) DeleteEquipmentType(w http.ResponseWriter, r *h
 	}
 
 	command := eqcommand.DeleteCommand{ID: uint(id), User: *user}
-	if err := ctrl.eqTypeHandler.DeleteEquipmentType(command); err != nil {
+	if err := ctrl.eqTypeDeleteHandler.Handle(command); err != nil {
 		corehttp.WriteJSONError(w, http.StatusConflict, err.Error())
 	}
 

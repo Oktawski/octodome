@@ -1,6 +1,6 @@
 package eqdom
 
-type EquipmentTypeDto struct {
+type EquipmentTypeDTO struct {
 	ID   uint
 	Name string
 }
