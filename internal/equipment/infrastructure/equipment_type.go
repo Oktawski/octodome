@@ -1,7 +1,7 @@
 package eqinfra
 
 import (
-	eqdom "octodome/internal/equipment/domain"
+	eqtypedom "octodome/internal/equipment/domain/equipment_type"
 
 	"gorm.io/gorm"
 )
@@ -16,19 +16,17 @@ func (equipmentType) TableName() string {
 	return "equipment_types"
 }
 
-func (e *equipmentType) toDomain() *eqdom.EquipmentType {
-	return &eqdom.EquipmentType{
+func (e *equipmentType) toDomain() *eqtypedom.EquipmentType {
+	return &eqtypedom.EquipmentType{
 		ID:     e.ID,
 		Name:   e.Name,
 		UserID: e.UserID,
 	}
 }
 
-func fromDomain(e *eqdom.EquipmentType) *equipmentType {
+func equipmentTypeFromDomain(e *eqtypedom.EquipmentType) *equipmentType {
 	return &equipmentType{
-		Model: gorm.Model{
-			ID: e.ID,
-		},
+		Model:  gorm.Model{ID: e.ID},
 		Name:   e.Name,
 		UserID: e.UserID,
 	}

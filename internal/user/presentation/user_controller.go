@@ -4,8 +4,8 @@ import (
 	"net/http"
 	corehttp "octodome/internal/core/http"
 	usercommand "octodome/internal/user/application/command"
+	userhandler "octodome/internal/user/application/handler"
 	userquery "octodome/internal/user/application/query"
-	userhandler "octodome/internal/user/application/user_handler"
 )
 
 type UserController struct {

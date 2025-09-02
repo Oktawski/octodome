@@ -4,102 +4,137 @@ import (
 	"net/http"
 	corehttp "octodome/internal/core/http"
 	eqcommand "octodome/internal/equipment/application/command"
-	eqhandler "octodome/internal/equipment/application/handler"
-	"octodome/internal/equipment/application/handler/eqtypehandler"
+	"octodome/internal/equipment/application/handler/equipment"
 	eqquery "octodome/internal/equipment/application/query"
 )
 
 type EquipmentController struct {
-	eqHandler            *eqhandler.EquipmentHandler
-	eqTypeCreateHandler  *eqtypehandler.CreateHandler
-	eqTypeDeleteHandler  *eqtypehandler.DeleteHandler
-	eqTypeGetByIDHandler *eqtypehandler.GetByIDHandler
-	eqTypeGetListHandler *eqtypehandler.GetListHandler
+	createHandler  *equipment.CreateHandler
+	updateHandler  *equipment.UpdateHandler
+	deleteHandler  *equipment.DeleteHandler
+	getByIDHandler *equipment.GetByIDHandler
+	getListHandler *equipment.GetListHandler
 }
 
 func NewEquipmentController(
-	eqHandler *eqhandler.EquipmentHandler,
-	CreateHandler *eqtypehandler.CreateHandler,
-	DeleteHandler *eqtypehandler.DeleteHandler,
-	GetByIDHandler *eqtypehandler.GetByIDHandler,
-	getListHandler *eqtypehandler.GetListHandler) *EquipmentController {
-
+	createHandler *equipment.CreateHandler,
+	updateHandler *equipment.UpdateHandler,
+	deleteHandler *equipment.DeleteHandler,
+	getByIDHandler *equipment.GetByIDHandler,
+	getListHandler *equipment.GetListHandler,
+) *EquipmentController {
 	return &EquipmentController{
-		eqHandler:            eqHandler,
-		eqTypeCreateHandler:  CreateHandler,
-		eqTypeDeleteHandler:  DeleteHandler,
-		eqTypeGetByIDHandler: GetByIDHandler,
-		eqTypeGetListHandler: getListHandler,
+		createHandler:  createHandler,
+		updateHandler:  updateHandler,
+		deleteHandler:  deleteHandler,
+		getByIDHandler: getByIDHandler,
+		getListHandler: getListHandler,
 	}
 }
 
-func (ctrl *EquipmentController) GetEquipmentTypes(w http.ResponseWriter, r *http.Request) {
+func (c *EquipmentController) GetEquipmentList(w http.ResponseWriter, r *http.Request) {
 	user, _ := corehttp.GetUserContext(r)
+	pagination := corehttp.GetPagination(r)
 
-	page := corehttp.GetQueryParamOrDefault(r, "page", 1)
-	pageSize := corehttp.GetQueryParamOrDefault(r, "pageSize", 100)
+	query := eqquery.EquipmentGetList{Pagination: pagination, User: *user}
 
-	query := eqquery.GetList{Page: page, PageSize: pageSize, User: *user}
-	eqTypes, totalCount, error := ctrl.eqTypeGetListHandler.Handle(query)
-	if error != nil {
-		corehttp.WriteJSONError(w, http.StatusNotFound, "could not fetch equipment types")
+	equipments, totalCount, err := c.getListHandler.Handle(query)
+	if err != nil {
+		corehttp.WriteJSONError(w, http.StatusNotFound, "could not fetch equipments")
 		return
 	}
 
-	response := &GetEquipmentTypesResponse{EqTypes: eqTypes, TotalCount: totalCount}
+	response := &GetEquipmentListResponse{Equipments: equipments, TotalCount: totalCount}
 	corehttp.WriteJSON(w, http.StatusOK, response)
 }
 
-func (ctrl *EquipmentController) GetEquipmentType(w http.ResponseWriter, r *http.Request) {
+func (c *EquipmentController) GetEquipment(w http.ResponseWriter, r *http.Request) {
 	user, _ := corehttp.GetUserContext(r)
-	id, err := corehttp.GetPathParam[int](r, "id")
+	equipmentID, err := corehttp.GetID(r)
 	if err != nil {
-		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid equipment type ID")
+		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid equipment ID")
 		return
 	}
 
-	query := eqquery.GetByID{ID: uint(id), User: *user}
-	eqType, err := ctrl.eqTypeGetByIDHandler.Handle(query)
+	query := eqquery.EquipmentGetByID{ID: equipmentID, User: *user}
+
+	equipment, err := c.getByIDHandler.Handle(query)
 	if err != nil {
-		corehttp.WriteJSONError(w, http.StatusBadRequest, "equipment type not found")
+		corehttp.WriteJSONError(w, http.StatusNotFound, "could not fetch equipment")
 		return
 	}
 
-	corehttp.WriteJSON(w, http.StatusOK, eqType)
+	corehttp.WriteJSON(w, http.StatusOK, equipment)
 }
 
-func (ctrl *EquipmentController) CreateEquipmentType(w http.ResponseWriter, r *http.Request) {
+func (c *EquipmentController) CreateEquipment(w http.ResponseWriter, r *http.Request) {
 	user, _ := corehttp.GetUserContext(r)
 
-	var dto EquipmentTypeCreateDto
+	var dto EquipmentCreateDTO
 	if err := corehttp.ParseJSON(r, &dto); err != nil {
-		corehttp.WriteJSONError(w, http.StatusBadRequest, err.Error())
+		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid request payload")
 		return
 	}
 
-	command := eqcommand.CreateCommand{Name: dto.Name, User: *user}
-	if err := ctrl.eqTypeCreateHandler.Handle(command); err != nil {
-		corehttp.WriteJSONError(w, http.StatusConflict, err.Error())
+	command := eqcommand.EquipmentCreateCommand{
+		Name:        dto.Name,
+		Description: dto.Description,
+		Category:    dto.Category,
+		UserContext: *user,
+	}
+	if err := c.createHandler.Handle(command); err != nil {
+		corehttp.WriteJSONError(w, http.StatusConflict, "could not create equipment")
 		return
 	}
 
-	// TODO: change response to include ID etc.
-	corehttp.WriteJSON(w, http.StatusCreated, dto)
+	corehttp.WriteJSON(w, http.StatusCreated, nil)
 }
 
-func (ctrl *EquipmentController) DeleteEquipmentType(w http.ResponseWriter, r *http.Request) {
+func (c *EquipmentController) UpdateEquipment(w http.ResponseWriter, r *http.Request) {
 	user, _ := corehttp.GetUserContext(r)
-
-	id, err := corehttp.GetPathParam[int](r, "id")
+	equipmentID, err := corehttp.GetID(r)
 	if err != nil {
-		corehttp.WriteJSONError(w, http.StatusBadRequest, err.Error())
+		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid equipment ID")
 		return
 	}
 
-	command := eqcommand.DeleteCommand{ID: uint(id), User: *user}
-	if err := ctrl.eqTypeDeleteHandler.Handle(command); err != nil {
-		corehttp.WriteJSONError(w, http.StatusConflict, err.Error())
+	var dto EquipmentUpdateDTO
+	if err := corehttp.ParseJSON(r, &dto); err != nil {
+		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid request payload")
+		return
 	}
 
-	corehttp.WriteStatus(w, http.StatusOK)
+	command := eqcommand.EquipmentUpdateCommand{
+		ID:          equipmentID,
+		Name:        dto.Name,
+		Description: dto.Description,
+		Category:    dto.Category,
+		UserContext: *user,
+	}
+	if err := c.updateHandler.Handle(command); err != nil {
+		corehttp.WriteJSONError(w, http.StatusConflict, "could not update equipment")
+		return
+	}
+
+	corehttp.WriteJSON(w, http.StatusNoContent, nil)
+}
+
+func (c *EquipmentController) DeleteEquipment(w http.ResponseWriter, r *http.Request) {
+	user, _ := corehttp.GetUserContext(r)
+	equipmentID, err := corehttp.GetID(r)
+	if err != nil {
+		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid equipment ID")
+		return
+	}
+
+	command := eqcommand.EquipmentDeleteCommand{
+		ID:          equipmentID,
+		UserContext: *user,
+	}
+	if err := c.deleteHandler.Handle(command); err != nil {
+		corehttp.WriteJSONError(w, http.StatusConflict, "could not delete equipment")
+		return
+	}
+
+	corehttp.WriteJSON(w, http.StatusNoContent, nil)
 }

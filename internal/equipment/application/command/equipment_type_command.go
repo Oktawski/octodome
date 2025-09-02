@@ -2,12 +2,18 @@ package eqcommand
 
 import authdom "octodome/internal/auth/domain"
 
-type CreateCommand struct {
-	User authdom.UserContext
-	Name string
+type EquipmentTypeCreateCommand struct {
+	Name        string
+	UserContext authdom.UserContext
 }
 
-type DeleteCommand struct {
-	User authdom.UserContext
-	ID   uint
+type EquipmentTypeUpdateCommand struct {
+	ID          uint
+	Name        string
+	UserContext authdom.UserContext
+}
+
+type EquipmentTypeDeleteCommand struct {
+	ID          uint
+	UserContext authdom.UserContext
 }

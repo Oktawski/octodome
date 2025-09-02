@@ -1,12 +1,17 @@
 package eqpres
 
-import eqdom "octodome/internal/equipment/domain"
+import eqtypedom "octodome/internal/equipment/domain/equipment_type"
+
+type GetEquipmentTypesResponse struct {
+	EqTypes    []eqtypedom.EquipmentTypeDTO `json:"equipmentTypes"`
+	TotalCount int64
+}
 
 type EquipmentTypeCreateDto struct {
 	Name string `json:"name"`
 }
 
-type GetEquipmentTypesResponse struct {
-	EqTypes    []eqdom.EquipmentTypeDTO `json:"equipmentTypes"`
-	TotalCount int64
+type EquipmentTypeUpdateDTO struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
 }

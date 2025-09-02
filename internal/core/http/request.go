@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"octodome/internal/core"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
@@ -105,4 +106,22 @@ func GetQueryParamOrDefault[T any](
 	}
 
 	return result.(T)
+}
+
+func GetPagination(r *http.Request) core.Pagination {
+	page := GetQueryParamOrDefault(r, "page", 1)
+	pageSize := GetQueryParamOrDefault(r, "pageSize", 100)
+
+	return core.Pagination{
+		Page:     page,
+		PageSize: pageSize,
+	}
+}
+
+func GetID(r *http.Request) (uint, error) {
+	id, err := GetPathParam[int](r, "id")
+	if err != nil {
+		return 0, err
+	}
+	return uint(id), nil
 }

@@ -2,15 +2,15 @@ package eqquery
 
 import (
 	authdom "octodome/internal/auth/domain"
+	"octodome/internal/core"
 )
 
-type GetByID struct {
-	User authdom.UserContext
+type EquipmentTypeGetByID struct {
 	ID   uint
+	User authdom.UserContext
 }
 
-type GetList struct {
-	User     authdom.UserContext
-	Page     int
-	PageSize int
+type EquipmentTypeGetList struct {
+	Pagination core.Pagination
+	User       authdom.UserContext
 }

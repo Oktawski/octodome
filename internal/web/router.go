@@ -6,12 +6,13 @@ import (
 	auth "octodome/internal/auth/application"
 	authinfra "octodome/internal/auth/infrastructure"
 	authpres "octodome/internal/auth/presentation"
-	eqhandler "octodome/internal/equipment/application/handler"
-	"octodome/internal/equipment/application/handler/eqtypehandler"
-	eqdom "octodome/internal/equipment/domain"
+	"octodome/internal/equipment/application/handler/equipment"
+	equipmenttype "octodome/internal/equipment/application/handler/equipment_type_handler"
+	equipmentdom "octodome/internal/equipment/domain/equipment"
+	eqtypedom "octodome/internal/equipment/domain/equipment_type"
 	eqinfra "octodome/internal/equipment/infrastructure"
 	eqpres "octodome/internal/equipment/presentation"
-	userhandler "octodome/internal/user/application/user_handler"
+	userhandler "octodome/internal/user/application/handler"
 	userdom "octodome/internal/user/domain"
 	userinfra "octodome/internal/user/infrastructure"
 	userpres "octodome/internal/user/presentation"
@@ -38,7 +39,7 @@ func StartServer() {
 
 	routes.RegisterUserRoutes(r, createUserController(userRepo))
 	routes.RegisterAuthRoutes(r, createAuthController(userRepo))
-	routes.RegisterEquipmentRoutes(r, createEquipmentController(db))
+	routes.RegisterEquipmentRoutes(r, createEquipmentController(db), createEquipmentTypeController(db))
 
 	http.ListenAndServe(":8989", r)
 }
@@ -57,20 +58,38 @@ func createAuthController(userRepo auth.AuthRepository) *authpres.AuthController
 	return authpres.NewAuthController(authHandler)
 }
 
-func createEquipmentController(db *gorm.DB) *eqpres.EquipmentController {
+func createEquipmentTypeController(db *gorm.DB) *eqpres.EquipmentTypeController {
 	eqTypeRepo := eqinfra.NewPgEquipmentTypeRepository(db)
-	eqTypeValidator := eqdom.NewEquipmentTypeValidator(eqTypeRepo)
+	eqTypeValidator := eqtypedom.NewEquipmentTypeValidator(eqTypeRepo)
 
-	eqHandler := eqhandler.NewEquipmentHandler()
-	eqTypeCreateHandler := eqtypehandler.NewCreateHandler(eqTypeValidator, eqTypeRepo)
-	eqTypeDeleteHandler := eqtypehandler.NewDeleteHandler(eqTypeValidator, eqTypeRepo)
-	eqTypeGetByIDHandler := eqtypehandler.NewGetByIDHandler(eqTypeValidator, eqTypeRepo)
-	eqTypeGetListHandler := eqtypehandler.NewGetListHandler(eqTypeValidator, eqTypeRepo)
+	eqTypeCreateHandler := equipmenttype.NewCreateHandler(eqTypeValidator, eqTypeRepo)
+	eqTypeUpdateHandler := equipmenttype.NewUpdateHandler(eqTypeValidator, eqTypeRepo)
+	eqTypeDeleteHandler := equipmenttype.NewDeleteHandler(eqTypeValidator, eqTypeRepo)
+	eqTypeGetByIDHandler := equipmenttype.NewGetByIDHandler(eqTypeValidator, eqTypeRepo)
+	eqTypeGetListHandler := equipmenttype.NewGetListHandler(eqTypeValidator, eqTypeRepo)
 
-	return eqpres.NewEquipmentController(
-		eqHandler,
+	return eqpres.NewEquipmentTypeController(
 		eqTypeCreateHandler,
+		eqTypeUpdateHandler,
 		eqTypeDeleteHandler,
 		eqTypeGetByIDHandler,
 		eqTypeGetListHandler)
+}
+
+func createEquipmentController(db *gorm.DB) *eqpres.EquipmentController {
+	eqRepo := eqinfra.NewPgEquipmentRepository(db)
+	equipmentValidator := equipmentdom.NewEquipmentValidator(eqRepo)
+
+	eqCreateHandler := equipment.NewCreateHandler(equipmentValidator, eqRepo)
+	eqUpdateHandler := equipment.NewUpdateHandler(equipmentValidator, eqRepo)
+	eqDeleteHandler := equipment.NewDeleteHandler(equipmentValidator, eqRepo)
+	eqGetByIDHandler := equipment.NewGetByIDHandler(eqRepo)
+	eqGetListHandler := equipment.NewGetListHandler(eqRepo)
+
+	return eqpres.NewEquipmentController(
+		eqCreateHandler,
+		eqUpdateHandler,
+		eqDeleteHandler,
+		eqGetByIDHandler,
+		eqGetListHandler)
 }
