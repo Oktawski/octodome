@@ -1,13 +1,13 @@
 package routes
 
 import (
-	userpres "octodome/internal/user/presentation"
+	http "octodome/internal/user/presentation"
 	"octodome/internal/web/middleware"
 
 	"github.com/go-chi/chi/v5"
 )
 
-func RegisterUserRoutes(r chi.Router, controller *userpres.UserController) {
+func RegisterUserRoutes(r chi.Router, controller *http.UserController) {
 	r.Route("/user", func(user chi.Router) {
 		user.Post("/", controller.CreateUser)
 

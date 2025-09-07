@@ -1,4 +1,4 @@
-package authdom
+package domain
 
 type ContextKey string
 

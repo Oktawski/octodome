@@ -1,24 +1,24 @@
-package userpres
+package http
 
 import (
 	"net/http"
 	corehttp "octodome/internal/core/http"
-	usercommand "octodome/internal/user/application/command"
-	userhandler "octodome/internal/user/application/handler"
-	userquery "octodome/internal/user/application/query"
+	cmd "octodome/internal/user/application/command"
+	hdl "octodome/internal/user/application/handler"
+	qry "octodome/internal/user/application/query"
 )
 
 type UserController struct {
-	userCreateHandler  *userhandler.CreateHandler
-	userGetByIDHandler *userhandler.GetByIDHandler
+	createHandler  *hdl.CreateHandler
+	getByIDHandler *hdl.GetByIDHandler
 }
 
 func NewUserController(
-	userCreate *userhandler.CreateHandler,
-	userGetByID *userhandler.GetByIDHandler) *UserController {
+	create *hdl.CreateHandler,
+	getByID *hdl.GetByIDHandler) *UserController {
 	return &UserController{
-		userCreateHandler:  userCreate,
-		userGetByIDHandler: userGetByID,
+		createHandler:  create,
+		getByIDHandler: getByID,
 	}
 }
 
@@ -29,8 +29,8 @@ func (ctrl *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := userquery.GetByID{ID: uint(id)}
-	user, err := ctrl.userGetByIDHandler.Handle(query)
+	query := qry.GetByID{ID: uint(id)}
+	user, err := ctrl.getByIDHandler.Handle(query)
 	if err != nil {
 		corehttp.WriteJSONError(w, http.StatusNotFound, "User not found")
 		return
@@ -40,13 +40,13 @@ func (ctrl *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ctrl *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var command usercommand.Create
+	var command cmd.Create
 	if err := corehttp.ParseJSON(r, &command); err != nil {
 		corehttp.WriteJSONError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	if err := ctrl.userCreateHandler.Handle(command); err != nil {
+	if err := ctrl.createHandler.Handle(command); err != nil {
 		corehttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
 		return
 	}

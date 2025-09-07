@@ -1,8 +1,8 @@
 package routes
 
 import (
-	eqhttp "octodome/internal/equipment/presentation/equipmenthttp"
-	eqtypehttp "octodome/internal/equipment/presentation/equipmenttypehttp"
+	eqhttp "octodome/internal/equipment/presentation/equipment"
+	eqtypehttp "octodome/internal/equipment/presentation/equipmenttype"
 	"octodome/internal/web/middleware"
 
 	"github.com/go-chi/chi/v5"

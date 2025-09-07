@@ -1,4 +1,4 @@
-package usercommand
+package cmd
 
 type Create struct {
 	Name     string

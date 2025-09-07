@@ -1,8 +1,12 @@
-package eqinfra
+package infra
 
-import "gorm.io/gorm"
+import (
+	"octodome/internal/equipment/infrastructure/model"
+
+	"gorm.io/gorm"
+)
 
 func Migrate(db *gorm.DB) {
-	db.AutoMigrate(&equipment{})
-	db.AutoMigrate(&equipmentType{})
+	db.AutoMigrate(&model.Equipment{})
+	db.AutoMigrate(&model.EquipmentType{})
 }

@@ -1,4 +1,4 @@
-package authdom
+package domain
 
 import userdom "octodome/internal/user/domain"
 
