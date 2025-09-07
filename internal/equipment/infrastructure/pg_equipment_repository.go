@@ -3,7 +3,7 @@ package eqinfra
 import (
 	authdom "octodome/internal/auth/domain"
 	"octodome/internal/core/collection"
-	equipmentdom "octodome/internal/equipment/domain/equipment"
+	eqdom "octodome/internal/equipment/domain/equipment"
 
 	"gorm.io/gorm"
 )
@@ -20,7 +20,7 @@ func (r *pgEquipmentRepository) GetList(
 	page,
 	pageSize int,
 	user authdom.UserContext,
-) ([]equipmentdom.Equipment, int64, error) {
+) ([]eqdom.Equipment, int64, error) {
 
 	var equipments []equipment
 	var total int64
@@ -35,7 +35,7 @@ func (r *pgEquipmentRepository) GetList(
 
 	equipmentList := collection.Map(
 		equipments,
-		func(e equipment) equipmentdom.Equipment {
+		func(e equipment) eqdom.Equipment {
 			return *e.toDomain()
 		},
 	)
@@ -46,7 +46,7 @@ func (r *pgEquipmentRepository) GetList(
 func (r *pgEquipmentRepository) GetByID(
 	id uint,
 	user authdom.UserContext,
-) (*equipmentdom.Equipment, error) {
+) (*eqdom.Equipment, error) {
 
 	var eq *equipment
 
@@ -60,7 +60,7 @@ func (r *pgEquipmentRepository) GetByID(
 	return eq.toDomain(), nil
 }
 
-func (r *pgEquipmentRepository) Create(e *equipmentdom.Equipment) error {
+func (r *pgEquipmentRepository) Create(e *eqdom.Equipment) error {
 	equipment := equipmentFromDomain(e)
 
 	if err := r.db.Create(equipment).Error; err != nil {
@@ -70,7 +70,7 @@ func (r *pgEquipmentRepository) Create(e *equipmentdom.Equipment) error {
 	return nil
 }
 
-func (r *pgEquipmentRepository) Update(e *equipmentdom.Equipment) error {
+func (r *pgEquipmentRepository) Update(e *eqdom.Equipment) error {
 	if dbError := r.db.
 		Model(&equipment{}).
 		Where("ID = ?", e.ID).

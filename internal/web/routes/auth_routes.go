@@ -1,7 +1,7 @@
 package routes
 
 import (
-	authpres "octodome/internal/auth/presentation"
+	authpres "octodome/internal/auth/authhttp"
 
 	"github.com/go-chi/chi/v5"
 )

@@ -1,8 +1,8 @@
-package equipmentdom
+package eqdom
 
 import authdom "octodome/internal/auth/domain"
 
-type EquipmentValidator interface {
+type Validator interface {
 	CanBeCreated(
 		name string,
 		equipmentTypeID uint,
@@ -15,15 +15,15 @@ type EquipmentValidator interface {
 	) bool
 }
 
-type equipmentValidator struct {
-	repo EquipmentRepository
+type validator struct {
+	repo Repository
 }
 
-func NewEquipmentValidator(repo EquipmentRepository) *equipmentValidator {
-	return &equipmentValidator{repo: repo}
+func NewValidator(repo Repository) *validator {
+	return &validator{repo: repo}
 }
 
-func (v equipmentValidator) CanBeCreated(
+func (v validator) CanBeCreated(
 	name string,
 	equipmentTypeID uint,
 	userContext authdom.UserContext,
@@ -31,7 +31,7 @@ func (v equipmentValidator) CanBeCreated(
 	return !v.repo.ExistsByNameAndType(name, equipmentTypeID, userContext)
 }
 
-func (v equipmentValidator) CanBeModified(
+func (v validator) CanBeModified(
 	equipmentID uint,
 	userContext authdom.UserContext,
 ) bool {

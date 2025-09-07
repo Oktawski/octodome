@@ -1,6 +1,6 @@
-package equipmentdom
+package eqdom
 
-import eqtypedom "octodome/internal/equipment/domain/equipment_type"
+import eqtypedom "octodome/internal/equipment/domain/equipmenttype"
 
 type EquipmentDTO struct {
 	ID   uint

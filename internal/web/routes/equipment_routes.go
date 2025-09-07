@@ -1,7 +1,8 @@
 package routes
 
 import (
-	eqpres "octodome/internal/equipment/presentation"
+	eqhttp "octodome/internal/equipment/presentation/equipmenthttp"
+	eqtypehttp "octodome/internal/equipment/presentation/equipmenttypehttp"
 	"octodome/internal/web/middleware"
 
 	"github.com/go-chi/chi/v5"
@@ -9,8 +10,8 @@ import (
 
 func RegisterEquipmentRoutes(
 	r chi.Router,
-	eqCtrl *eqpres.EquipmentController,
-	eqTypeCtrl *eqpres.EquipmentTypeController) {
+	eqCtrl *eqhttp.EquipmentController,
+	eqTypeCtrl *eqtypehttp.EquipmentTypeController) {
 
 	r.Route("/equipment", func(eq chi.Router) {
 		eq.Use(middleware.JwtAuthMiddleware)

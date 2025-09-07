@@ -1,8 +1,8 @@
-package equipmentdom
+package eqdom
 
 import authdom "octodome/internal/auth/domain"
 
-type EquipmentRepository interface {
+type Repository interface {
 	GetList(page, pageSize int, user authdom.UserContext) ([]Equipment, int64, error)
 	GetByID(id uint, user authdom.UserContext) (*Equipment, error)
 	Create(equipment *Equipment) error

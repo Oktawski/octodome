@@ -1,27 +1,30 @@
-package equipment
+package eq
 
 import (
-	eqquery "octodome/internal/equipment/application/query"
-	equipmentdom "octodome/internal/equipment/domain/equipment"
+	eqqry "octodome/internal/equipment/application/query/equipment"
+	eqdom "octodome/internal/equipment/domain/equipment"
 )
 
 type GetByIDHandler struct {
-	repo equipmentdom.EquipmentRepository
+	repo eqdom.Repository
 }
 
-func NewGetByIDHandler(repo equipmentdom.EquipmentRepository) *GetByIDHandler {
+func NewGetByIDHandler(repo eqdom.Repository) *GetByIDHandler {
 	return &GetByIDHandler{
 		repo: repo,
 	}
 }
 
-func (h *GetByIDHandler) Handle(q eqquery.EquipmentGetByID) (*equipmentdom.EquipmentDTO, error) {
+func (h *GetByIDHandler) Handle(q eqqry.GetByID) (
+	*eqdom.EquipmentDTO,
+	error,
+) {
 	equipment, err := h.repo.GetByID(q.ID, q.User)
 	if err != nil {
 		return nil, err
 	}
 
-	response := &equipmentdom.EquipmentDTO{
+	response := &eqdom.EquipmentDTO{
 		ID:   equipment.ID,
 		Name: equipment.Name,
 		Type: equipment.EquipmentType.ToDTO(),

@@ -1,19 +1,19 @@
-package equipment
+package eq
 
 import (
 	"errors"
-	eqcommand "octodome/internal/equipment/application/command"
-	equipmentdom "octodome/internal/equipment/domain/equipment"
+	eqcmd "octodome/internal/equipment/application/command/equipment"
+	eqdom "octodome/internal/equipment/domain/equipment"
 )
 
 type UpdateHandler struct {
-	validator  equipmentdom.EquipmentValidator
-	repository equipmentdom.EquipmentRepository
+	validator  eqdom.Validator
+	repository eqdom.Repository
 }
 
 func NewUpdateHandler(
-	validator equipmentdom.EquipmentValidator,
-	repository equipmentdom.EquipmentRepository,
+	validator eqdom.Validator,
+	repository eqdom.Repository,
 ) *UpdateHandler {
 	return &UpdateHandler{
 		repository: repository,
@@ -21,12 +21,12 @@ func NewUpdateHandler(
 	}
 }
 
-func (h *UpdateHandler) Handle(c eqcommand.EquipmentUpdateCommand) error {
+func (h *UpdateHandler) Handle(c eqcmd.Update) error {
 	if !h.validator.CanBeModified(c.ID, c.UserContext) {
 		return errors.New("equipment cannot be modified")
 	}
 
-	equipment := &equipmentdom.Equipment{
+	equipment := &eqdom.Equipment{
 		ID:          c.ID,
 		Name:        c.Name,
 		Description: c.Description,

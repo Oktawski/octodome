@@ -1,7 +1,7 @@
 package eqinfra
 
 import (
-	equipmentdom "octodome/internal/equipment/domain/equipment"
+	eqdom "octodome/internal/equipment/domain/equipment"
 
 	"gorm.io/gorm"
 )
@@ -20,8 +20,8 @@ func (equipment) TableName() string {
 	return "equipments"
 }
 
-func (e *equipment) toDomain() *equipmentdom.Equipment {
-	return &equipmentdom.Equipment{
+func (e *equipment) toDomain() *eqdom.Equipment {
+	return &eqdom.Equipment{
 		ID:              e.ID,
 		Name:            e.Name,
 		Description:     e.Description,
@@ -31,7 +31,7 @@ func (e *equipment) toDomain() *equipmentdom.Equipment {
 	}
 }
 
-func equipmentFromDomain(ed *equipmentdom.Equipment) *equipment {
+func equipmentFromDomain(ed *eqdom.Equipment) *equipment {
 	return &equipment{
 		Model:           gorm.Model{ID: ed.ID},
 		Name:            ed.Name,

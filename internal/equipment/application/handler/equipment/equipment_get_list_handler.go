@@ -1,29 +1,29 @@
-package equipment
+package eq
 
 import (
-	eqquery "octodome/internal/equipment/application/query"
-	equipmentdom "octodome/internal/equipment/domain/equipment"
+	eqqry "octodome/internal/equipment/application/query/equipment"
+	eqdom "octodome/internal/equipment/domain/equipment"
 )
 
 type GetListHandler struct {
-	repo equipmentdom.EquipmentRepository
+	repo eqdom.Repository
 }
 
-func NewGetListHandler(repo equipmentdom.EquipmentRepository) *GetListHandler {
+func NewGetListHandler(repo eqdom.Repository) *GetListHandler {
 	return &GetListHandler{
 		repo: repo,
 	}
 }
 
-func (h *GetListHandler) Handle(q eqquery.EquipmentGetList) ([]equipmentdom.EquipmentDTO, int64, error) {
+func (h *GetListHandler) Handle(q eqqry.GetList) ([]eqdom.EquipmentDTO, int64, error) {
 	equipments, totalCount, err := h.repo.GetList(q.Pagination.Page, q.Pagination.PageSize, q.User)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	responses := make([]equipmentdom.EquipmentDTO, len(equipments))
+	responses := make([]eqdom.EquipmentDTO, len(equipments))
 	for i, e := range equipments {
-		responses[i] = equipmentdom.EquipmentDTO{
+		responses[i] = eqdom.EquipmentDTO{
 			ID:   e.ID,
 			Name: e.Name,
 			Type: e.EquipmentType.ToDTO(),
