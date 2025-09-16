@@ -8,31 +8,33 @@ import (
 	"os"
 	"strings"
 
-	auth "octodome/internal/auth/domain"
+	authmod "octodome/internal/auth"
 	authdom "octodome/internal/auth/domain"
 
 	"github.com/golang-jwt/jwt/v5"
+	"gorm.io/gorm"
 )
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
-func JwtAuthMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		userContext, err := extractUserFromJwt(r)
-		if err != nil {
-			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusUnauthorized)
-			fmt.Fprintf(w, `{"error: %q}`, err.Error())
-			return
-		}
+func JwtAuthMiddleware(db *gorm.DB) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			userContext, err := extractUserFromJwt(r, db)
+			if err != nil {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				fmt.Fprintf(w, `{"error": %q}`, err.Error())
+				return
+			}
 
-		ctx := context.WithValue(r.Context(), authdom.UserContextKey, userContext)
-
-		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+			ctx := context.WithValue(r.Context(), authdom.UserContextKey, userContext)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
 }
 
-func extractUserFromJwt(r *http.Request) (*auth.UserContext, error) {
+func extractUserFromJwt(r *http.Request, db *gorm.DB) (*authdom.UserContext, error) {
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		return nil, errors.New("authorization header required")
@@ -47,7 +49,7 @@ func extractUserFromJwt(r *http.Request) (*auth.UserContext, error) {
 
 	token, err := jwt.ParseWithClaims(
 		tokenStr,
-		&auth.UserClaims{},
+		&authdom.UserClaims{},
 		func(token *jwt.Token) (interface{}, error) {
 			return jwtSecret, nil
 		},
@@ -56,10 +58,16 @@ func extractUserFromJwt(r *http.Request) (*auth.UserContext, error) {
 		return nil, errors.New("invalid or expired token")
 	}
 
-	claims, ok := token.Claims.(*auth.UserClaims)
+	claims, ok := token.Claims.(*authdom.UserClaims)
 	if !ok {
 		return nil, errors.New("invalid token claims")
 	}
 
-	return &auth.UserContext{ID: claims.UserID}, nil
+	repo := authmod.ProvideRoleReader(db)
+	roles, err := repo.GetRolesByUserID(claims.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &authdom.UserContext{ID: claims.UserID, Roles: roles}, nil
 }

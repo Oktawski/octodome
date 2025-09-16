@@ -1,9 +1,8 @@
-package infra
+package security
 
 import (
 	authdomshared "octodome/internal/auth/domain"
 	authdom "octodome/internal/auth/internal/domain"
-	userdom "octodome/internal/user/domain"
 	"os"
 	"time"
 
@@ -19,7 +18,7 @@ func NewJwtTokenGenerator() authdom.AuthTokenGenerator {
 
 var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
-func (j *jwtTokenGenerator) GenerateToken(user *userdom.User) (string, error) {
+func (j *jwtTokenGenerator) GenerateToken(user *authdomshared.UserAuthDTO) (string, error) {
 	claims := authdomshared.UserClaims{
 		UserID:   user.ID,
 		Username: user.Username,

@@ -23,20 +23,20 @@ func (r *pgUserRepository) GetByID(id uint) (*domain.User, error) {
 }
 
 func (r *pgUserRepository) GetUserByUsername(username string) (*domain.User, error) {
-	var userModel *User
+	var model *User
 
-	dbError := r.db.Where("username = ?", username).First(&userModel).Error
+	dbError := r.db.Where("username = ?", username).First(&model).Error
 	if dbError != nil {
 		return nil, dbError
 	}
 
-	return userModel.ToDomain(), nil
+	return model.ToDomain(), nil
 }
 
 func (r *pgUserRepository) Create(user *domain.User) error {
-	gormUser := fromDomain(user)
+	model := fromDomain(user)
 
-	if err := r.db.Create(gormUser).Error; err != nil {
+	if err := r.db.Create(model).Error; err != nil {
 		return err
 	}
 

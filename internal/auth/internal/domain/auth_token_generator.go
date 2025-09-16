@@ -1,7 +1,9 @@
 package domain
 
-import userdom "octodome/internal/user/domain"
+import (
+	"octodome/internal/auth/domain"
+)
 
 type AuthTokenGenerator interface {
-	GenerateToken(user *userdom.User) (string, error)
+	GenerateToken(user *domain.UserAuthDTO) (string, error)
 }

@@ -1,4 +1,4 @@
-package infra
+package security
 
 import (
 	"octodome/internal/auth/internal/domain"

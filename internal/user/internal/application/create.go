@@ -1,11 +1,16 @@
-package hdl
+package user
 
 import (
 	"octodome/internal/user/domain"
-	cmd "octodome/internal/user/internal/application/command"
 
 	"golang.org/x/crypto/bcrypt"
 )
+
+type Create struct {
+	Name     string
+	Email    string
+	Password string
+}
 
 type CreateHandler struct {
 	repo domain.Repository
@@ -15,7 +20,7 @@ func NewCreateHandler(repository domain.Repository) *CreateHandler {
 	return &CreateHandler{repo: repository}
 }
 
-func (handler *CreateHandler) Handle(c cmd.Create) error {
+func (handler *CreateHandler) Handle(c Create) error {
 	passwordHash, err := handler.hashPassword(c.Password)
 	if err != nil {
 		return err

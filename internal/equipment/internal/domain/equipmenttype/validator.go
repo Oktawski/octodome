@@ -26,6 +26,10 @@ func (v validator) CanBeModified(
 	id uint,
 	userContext authdom.UserContext,
 ) bool {
-	return !v.repo.IsUsed(id, userContext) &&
+	if v.repo.IsUsed(id, userContext) {
+		return false
+	}
+
+	return userContext.HasRole(authdom.RoleAdmin) ||
 		v.repo.OwnedByUser(id, userContext)
 }

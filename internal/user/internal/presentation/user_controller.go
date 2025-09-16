@@ -3,19 +3,17 @@ package http
 import (
 	"net/http"
 	corehttp "octodome/internal/core/http"
-	cmd "octodome/internal/user/internal/application/command"
-	hdl "octodome/internal/user/internal/application/handler"
-	qry "octodome/internal/user/internal/application/query"
+	user "octodome/internal/user/internal/application"
 )
 
 type UserController struct {
-	createHandler  *hdl.CreateHandler
-	getByIDHandler *hdl.GetByIDHandler
+	createHandler  *user.CreateHandler
+	getByIDHandler *user.GetByIDHandler
 }
 
 func NewUserController(
-	create *hdl.CreateHandler,
-	getByID *hdl.GetByIDHandler) *UserController {
+	create *user.CreateHandler,
+	getByID *user.GetByIDHandler) *UserController {
 	return &UserController{
 		createHandler:  create,
 		getByIDHandler: getByID,
@@ -29,7 +27,7 @@ func (ctrl *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := qry.GetByID{ID: uint(id)}
+	query := user.GetByID{ID: uint(id)}
 	user, err := ctrl.getByIDHandler.Handle(query)
 	if err != nil {
 		corehttp.WriteJSONError(w, http.StatusNotFound, "User not found")
@@ -40,7 +38,7 @@ func (ctrl *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ctrl *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var command cmd.Create
+	var command user.Create
 	if err := corehttp.ParseJSON(r, &command); err != nil {
 		corehttp.WriteJSONError(w, http.StatusBadRequest, err.Error())
 		return

@@ -23,9 +23,9 @@ func createEquipmentTypeController(db *gorm.DB) *http.EquipmentTypeController {
 		hdl.NewGetListHandler(eqTypeValidator, eqTypeRepo))
 }
 
-func registerEquipmentTypeRoutes(r chi.Router, ctrl *http.EquipmentTypeController) {
+func registerEquipmentTypeRoutes(r chi.Router, db *gorm.DB, ctrl *http.EquipmentTypeController) {
 	r.Route("/equipment-type", func(eqType chi.Router) {
-		eqType.Use(middleware.JwtAuthMiddleware)
+		eqType.Use(middleware.JwtAuthMiddleware(db))
 
 		eqType.Get("/", ctrl.GetEquipmentTypeList)
 		eqType.Get("/{id:[0-9]+}", ctrl.GetEquipmentType)

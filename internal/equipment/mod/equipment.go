@@ -30,9 +30,9 @@ func createEquipmentController(db *gorm.DB) *http.EquipmentController {
 	)
 }
 
-func registerEquipmentRoutes(r chi.Router, ctrl *http.EquipmentController) {
+func registerEquipmentRoutes(r chi.Router, db *gorm.DB, ctrl *http.EquipmentController) {
 	r.Route("/equipment", func(eq chi.Router) {
-		eq.Use(middleware.JwtAuthMiddleware)
+		eq.Use(middleware.JwtAuthMiddleware(db))
 
 		eq.Get("/", ctrl.GetEquipmentList)
 		eq.Get("/{id:[0-9]+}", ctrl.GetEquipment)

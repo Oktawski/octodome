@@ -17,12 +17,12 @@ func (User) TableName() string {
 	return "users"
 }
 
-func (g *User) ToDomain() *domain.User {
+func (e *User) ToDomain() *domain.User {
 	return &domain.User{
-		ID:           g.ID,
-		Username:     g.Username,
-		Email:        g.Email,
-		PasswordHash: g.PasswordHash,
+		ID:           e.ID,
+		Username:     e.Username,
+		Email:        e.Email,
+		PasswordHash: e.PasswordHash,
 	}
 }
 

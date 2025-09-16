@@ -10,6 +10,6 @@ import (
 func Initialize(r chi.Router, db *gorm.DB) {
 	infra.Migrate(db)
 
-	registerEquipmentRoutes(r, createEquipmentController(db))
-	registerEquipmentTypeRoutes(r, createEquipmentTypeController(db))
+	registerEquipmentRoutes(r, db, createEquipmentController(db))
+	registerEquipmentTypeRoutes(r, db, createEquipmentTypeController(db))
 }

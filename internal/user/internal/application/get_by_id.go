@@ -1,9 +1,12 @@
-package hdl
+package user
 
 import (
 	"octodome/internal/user/domain"
-	qry "octodome/internal/user/internal/application/query"
 )
+
+type GetByID struct {
+	ID uint
+}
 
 type GetByIDHandler struct {
 	repo domain.Repository
@@ -13,7 +16,7 @@ func NewUserGetByIDHandler(repo domain.Repository) *GetByIDHandler {
 	return &GetByIDHandler{repo: repo}
 }
 
-func (handler *GetByIDHandler) Handle(q qry.GetByID) (*domain.UserDTO, error) {
+func (handler *GetByIDHandler) Handle(q GetByID) (*domain.UserDTO, error) {
 	user, err := handler.repo.GetByID(q.ID)
 	if err != nil {
 		return nil, err

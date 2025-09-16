@@ -1,7 +1,7 @@
 package infra
 
 import (
-	"octodome/internal/user/domain"
+	authdom "octodome/internal/auth/domain"
 	infra "octodome/internal/user/internal/infrastructure"
 
 	"gorm.io/gorm"
@@ -15,13 +15,18 @@ func NewPgUserRepository(db *gorm.DB) *pgUserRepository {
 	return &pgUserRepository{db: db}
 }
 
-func (r *pgUserRepository) GetUserByUsername(username string) (*domain.User, error) {
-	var userModel *infra.User
+func (r *pgUserRepository) GetUserAuthDTO(username string) (*authdom.UserAuthDTO, error) {
+	var user authdom.UserAuthDTO
 
-	dbError := r.db.Where("username = ?", username).First(&userModel).Error
+	dbError := r.db.
+		Model(infra.User{}).
+		Select("id, username, password").
+		Where("username = ?", username).
+		Take(&user).
+		Error
 	if dbError != nil {
 		return nil, dbError
 	}
 
-	return userModel.ToDomain(), nil
+	return &user, nil
 }
