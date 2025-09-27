@@ -2,6 +2,7 @@ package infra
 
 import (
 	"octodome/internal/user/domain"
+	infra "octodome/internal/user/infrastructure"
 
 	"gorm.io/gorm"
 )
@@ -15,7 +16,7 @@ func NewPgUserRepository(db *gorm.DB) *pgUserRepository {
 }
 
 func (r *pgUserRepository) GetByID(id uint) (*domain.User, error) {
-	var u User
+	var u infra.User
 
 	result := r.db.First(&u, id)
 
@@ -23,7 +24,7 @@ func (r *pgUserRepository) GetByID(id uint) (*domain.User, error) {
 }
 
 func (r *pgUserRepository) GetUserByUsername(username string) (*domain.User, error) {
-	var model *User
+	var model *infra.User
 
 	dbError := r.db.Where("username = ?", username).First(&model).Error
 	if dbError != nil {
@@ -34,7 +35,7 @@ func (r *pgUserRepository) GetUserByUsername(username string) (*domain.User, err
 }
 
 func (r *pgUserRepository) Create(user *domain.User) error {
-	model := fromDomain(user)
+	model := infra.FromDomain(user)
 
 	if err := r.db.Create(model).Error; err != nil {
 		return err

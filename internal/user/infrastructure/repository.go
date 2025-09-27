@@ -2,7 +2,6 @@ package infra
 
 import (
 	authdom "octodome/internal/auth/domain"
-	infra "octodome/internal/user/internal/infrastructure"
 
 	"gorm.io/gorm"
 )
@@ -19,7 +18,7 @@ func (r *pgUserRepository) GetUserAuthDTO(username string) (*authdom.UserAuthDTO
 	var user authdom.UserAuthDTO
 
 	dbError := r.db.
-		Model(infra.User{}).
+		Model(User{}).
 		Select("id, username, password").
 		Where("username = ?", username).
 		Take(&user).

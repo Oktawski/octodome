@@ -98,8 +98,8 @@ func (r *pgEquipmentTypeRepository) Delete(id uint) error {
 
 func (r *pgEquipmentTypeRepository) ExistsByName(
 	name string,
-	userContext authdom.UserContext) bool {
-
+	userContext authdom.UserContext,
+) bool {
 	var count int64
 
 	if err := r.db.Model(&model.EquipmentType{}).

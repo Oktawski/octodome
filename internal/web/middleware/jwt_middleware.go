@@ -8,8 +8,8 @@ import (
 	"os"
 	"strings"
 
-	authmod "octodome/internal/auth"
 	authdom "octodome/internal/auth/domain"
+	authprovider "octodome/internal/auth/provider"
 
 	"github.com/golang-jwt/jwt/v5"
 	"gorm.io/gorm"
@@ -63,7 +63,7 @@ func extractUserFromJwt(r *http.Request, db *gorm.DB) (*authdom.UserContext, err
 		return nil, errors.New("invalid token claims")
 	}
 
-	repo := authmod.ProvideRoleReader(db)
+	repo := authprovider.ProvideRoleReader(db)
 	roles, err := repo.GetRolesByUserID(claims.UserID)
 	if err != nil {
 		return nil, err

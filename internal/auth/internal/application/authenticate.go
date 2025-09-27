@@ -11,7 +11,7 @@ type AuthenticateCommand struct {
 }
 
 type AuthenticateHandler interface {
-	Handle(authReq *AuthenticateCommand) (string, error)
+	Handle(authReq AuthenticateCommand) (string, error)
 }
 
 type authenticateHandler struct {
@@ -31,7 +31,7 @@ func NewAuthenticateHandler(
 	}
 }
 
-func (handler *authenticateHandler) Handle(request *AuthenticateCommand) (string, error) {
+func (handler *authenticateHandler) Handle(request AuthenticateCommand) (string, error) {
 	userAuthDTO, err := handler.userReader.GetUserAuthDTO(request.Username)
 	if err != nil {
 		return "", err

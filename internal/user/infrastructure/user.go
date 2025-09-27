@@ -26,7 +26,7 @@ func (e *User) ToDomain() *domain.User {
 	}
 }
 
-func fromDomain(u *domain.User) *User {
+func FromDomain(u *domain.User) *User {
 	return &User{
 		Model:        gorm.Model{ID: u.ID},
 		Email:        u.Email,

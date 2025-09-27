@@ -1,7 +1,11 @@
 package infra
 
-import "gorm.io/gorm"
+import (
+	infra "octodome/internal/user/infrastructure"
+
+	"gorm.io/gorm"
+)
 
 func Migrate(db *gorm.DB) {
-	db.AutoMigrate(&User{})
+	db.AutoMigrate(&infra.User{})
 }

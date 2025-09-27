@@ -7,6 +7,11 @@ const (
 	RoleAdmin RoleName = "admin"
 )
 
+var AvailableRolesStr = []string{
+	string(RoleUser),
+	string(RoleAdmin),
+}
+
 type RoleDTO struct {
 	Name RoleName
 }
