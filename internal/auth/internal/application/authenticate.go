@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"octodome/internal/auth/internal/dependencies"
 	"octodome/internal/auth/internal/domain"
 	domainrepo "octodome/internal/auth/internal/domain/repository"
 )
@@ -20,14 +21,11 @@ type authenticateHandler struct {
 	passwordHasher domain.PasswordHasher
 }
 
-func NewAuthenticateHandler(
-	userReader domainrepo.UserReader,
-	tokenGenerator domain.AuthTokenGenerator,
-	passwordHasher domain.PasswordHasher) AuthenticateHandler {
+func NewAuthenticateHandler(deps dependencies.Container) AuthenticateHandler {
 	return &authenticateHandler{
-		userReader:     userReader,
-		tokenGenerator: tokenGenerator,
-		passwordHasher: passwordHasher,
+		userReader:     deps.UserReader,
+		tokenGenerator: deps.TokenGenerator,
+		passwordHasher: deps.PasswordHasher,
 	}
 }
 

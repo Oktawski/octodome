@@ -2,21 +2,20 @@ package hdl
 
 import (
 	qry "octodome/internal/equipment/internal/application/query"
+	"octodome/internal/equipment/internal/dependencies"
 	domain "octodome/internal/equipment/internal/domain/equipmenttype"
 )
 
 type GetByIDHandler struct {
-	validator  domain.Validator
 	repository domain.Repository
+	validator  domain.Validator
 }
 
-func NewGetByIDHandler(
-	validator domain.Validator,
-	repository domain.Repository) *GetByIDHandler {
+func NewGetByIDHandler(deps dependencies.EquipmentTypeContainer) *GetByIDHandler {
 
 	return &GetByIDHandler{
-		validator:  validator,
-		repository: repository,
+		repository: deps.Repository,
+		validator:  deps.Validator,
 	}
 }
 

@@ -10,6 +10,6 @@ type UserRole struct {
 	UserID uint
 	User   infra.User `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:UserID;references:ID"`
 
-	RoleID string
-	Role   Role `gorm:"not null;index;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:RoleID;references:Name"`
+	RoleID string `gorm:"not null;index"`
+	Role   Role   `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;foreignKey:RoleID;references:Name"`
 }

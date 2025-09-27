@@ -10,15 +10,18 @@ import (
 type AuthController struct {
 	AuthenticateHandler auth.AuthenticateHandler
 	AssignRoleHandler   auth.AssignRoleHandler
+	UnassignRoleHandler auth.UnassignRoleHandler
 }
 
 func NewAuthController(
 	authenticateHandler auth.AuthenticateHandler,
 	assignRoleHandler auth.AssignRoleHandler,
+	unassignRoleHandler auth.UnassignRoleHandler,
 ) *AuthController {
 	return &AuthController{
 		AuthenticateHandler: authenticateHandler,
 		AssignRoleHandler:   assignRoleHandler,
+		UnassignRoleHandler: unassignRoleHandler,
 	}
 }
 
@@ -64,4 +67,8 @@ func (ctrl *AuthController) AssignRole(w http.ResponseWriter, r *http.Request) {
 	}
 
 	corehttp.WriteJSON(w, http.StatusOK, nil)
+}
+
+func (ctrl *AuthController) UnassignRole(w http.ResponseWriter, r *http.Request) {
+
 }

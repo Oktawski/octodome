@@ -2,6 +2,7 @@ package hdl
 
 import (
 	qry "octodome/internal/equipment/internal/application/query"
+	"octodome/internal/equipment/internal/dependencies"
 	domain "octodome/internal/equipment/internal/domain/equipment"
 )
 
@@ -9,9 +10,9 @@ type GetListHandler struct {
 	repo domain.Repository
 }
 
-func NewGetListHandler(repo domain.Repository) *GetListHandler {
+func NewGetListHandler(deps dependencies.EquipmentContainer) *GetListHandler {
 	return &GetListHandler{
-		repo: repo,
+		repo: deps.Repository,
 	}
 }
 

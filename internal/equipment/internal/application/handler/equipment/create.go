@@ -3,20 +3,19 @@ package hdl
 import (
 	"errors"
 	cmd "octodome/internal/equipment/internal/application/command"
+	"octodome/internal/equipment/internal/dependencies"
 	domain "octodome/internal/equipment/internal/domain/equipment"
 )
 
 type CreateHandler struct {
-	validator domain.Validator
 	repo      domain.Repository
+	validator domain.Validator
 }
 
-func NewCreateHandler(
-	validator domain.Validator,
-	repository domain.Repository) *CreateHandler {
+func NewCreateHandler(deps dependencies.EquipmentContainer) *CreateHandler {
 	return &CreateHandler{
-		validator: validator,
-		repo:      repository,
+		repo:      deps.Repository,
+		validator: deps.Validator,
 	}
 }
 

@@ -2,6 +2,7 @@ package mod
 
 import (
 	hdl "octodome/internal/equipment/internal/application/handler/equipmenttype"
+	"octodome/internal/equipment/internal/dependencies"
 	domain "octodome/internal/equipment/internal/domain/equipmenttype"
 	repo "octodome/internal/equipment/internal/infrastructure/repository"
 	http "octodome/internal/equipment/internal/presentation/equipmenttype"
@@ -15,12 +16,14 @@ func createEquipmentTypeController(db *gorm.DB) *http.EquipmentTypeController {
 	eqTypeRepo := repo.NewPgEquipmentTypeRepository(db)
 	eqTypeValidator := domain.NewEquipmentTypeValidator(eqTypeRepo)
 
+	deps := dependencies.NewEquipmentTypeContainer(eqTypeRepo, eqTypeValidator)
+
 	return http.NewEquipmentTypeController(
-		hdl.NewCreateHandler(eqTypeValidator, eqTypeRepo),
-		hdl.NewUpdateHandler(eqTypeValidator, eqTypeRepo),
-		hdl.NewDeleteHandler(eqTypeValidator, eqTypeRepo),
-		hdl.NewGetByIDHandler(eqTypeValidator, eqTypeRepo),
-		hdl.NewGetListHandler(eqTypeValidator, eqTypeRepo))
+		hdl.NewCreateHandler(deps),
+		hdl.NewUpdateHandler(deps),
+		hdl.NewDeleteHandler(deps),
+		hdl.NewGetByIDHandler(deps),
+		hdl.NewGetListHandler(deps))
 }
 
 func registerEquipmentTypeRoutes(r chi.Router, db *gorm.DB, ctrl *http.EquipmentTypeController) {

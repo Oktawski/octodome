@@ -2,6 +2,7 @@ package mod
 
 import (
 	hdl "octodome/internal/equipment/internal/application/handler/equipment"
+	"octodome/internal/equipment/internal/dependencies"
 	domain "octodome/internal/equipment/internal/domain/equipment"
 	repo "octodome/internal/equipment/internal/infrastructure/repository"
 	http "octodome/internal/equipment/internal/presentation/equipment"
@@ -15,11 +16,16 @@ func createEquipmentController(db *gorm.DB) *http.EquipmentController {
 	eqRepo := repo.NewPgEquipmentRepository(db)
 	equipmentValidator := domain.NewValidator(eqRepo)
 
-	create := hdl.NewCreateHandler(equipmentValidator, eqRepo)
-	update := hdl.NewUpdateHandler(equipmentValidator, eqRepo)
-	delete := hdl.NewDeleteHandler(equipmentValidator, eqRepo)
-	getByID := hdl.NewGetByIDHandler(eqRepo)
-	getList := hdl.NewGetListHandler(eqRepo)
+	deps := dependencies.NewEquipmentContainer(
+		eqRepo,
+		equipmentValidator,
+	)
+
+	create := hdl.NewCreateHandler(deps)
+	update := hdl.NewUpdateHandler(deps)
+	delete := hdl.NewDeleteHandler(deps)
+	getByID := hdl.NewGetByIDHandler(deps)
+	getList := hdl.NewGetListHandler(deps)
 
 	return http.NewEquipmentController(
 		create,

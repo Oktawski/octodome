@@ -3,21 +3,19 @@ package hdl
 import (
 	"errors"
 	cmd "octodome/internal/equipment/internal/application/command"
+	"octodome/internal/equipment/internal/dependencies"
 	domain "octodome/internal/equipment/internal/domain/equipmenttype"
 )
 
 type UpdateHandler struct {
-	validator domain.Validator
 	repo      domain.Repository
+	validator domain.Validator
 }
 
-func NewUpdateHandler(
-	validator domain.Validator,
-	repo domain.Repository,
-) *UpdateHandler {
+func NewUpdateHandler(deps dependencies.EquipmentTypeContainer) *UpdateHandler {
 	return &UpdateHandler{
-		validator: validator,
-		repo:      repo,
+		repo:      deps.Repository,
+		validator: deps.Validator,
 	}
 }
 

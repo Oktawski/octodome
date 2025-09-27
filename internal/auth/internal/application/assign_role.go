@@ -3,14 +3,16 @@ package auth
 import (
 	"fmt"
 	domainshared "octodome/internal/auth/domain"
+	"octodome/internal/auth/internal/dependencies"
 	domain "octodome/internal/auth/internal/domain/repository"
 	"octodome/internal/auth/internal/domain/validator"
 	"strings"
 )
 
 type AssignRoleCommand struct {
-	Role   domainshared.RoleName
-	UserID uint
+	Role        domainshared.RoleName
+	UserID      uint
+	UserContext domainshared.UserContext
 }
 
 type AssignRoleHandler interface {
@@ -18,17 +20,19 @@ type AssignRoleHandler interface {
 }
 
 type assignRoleHandler struct {
-	repo domain.RoleRepository
+	repo      domain.RoleRepository
+	validator validator.Role
 }
 
-func NewAssignRoleHandler(
-	repo domain.RoleRepository,
-) AssignRoleHandler {
-	return &assignRoleHandler{repo: repo}
+func NewAssignRoleHandler(deps dependencies.Container) AssignRoleHandler {
+	return &assignRoleHandler{
+		repo:      deps.RoleRepository,
+		validator: deps.RoleValidator,
+	}
 }
 
 func (h *assignRoleHandler) Handle(c AssignRoleCommand) error {
-	if !validator.CanBeUsed(c.Role) {
+	if !h.validator.CanBeUsed(c.Role) {
 		return fmt.Errorf(
 			"role cannot be used. available roles: %s",
 			strings.Join(domainshared.AvailableRolesStr, ", "))

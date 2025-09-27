@@ -3,6 +3,8 @@ package mod
 import (
 	"octodome/internal/auth/domain"
 	auth "octodome/internal/auth/internal/application"
+	"octodome/internal/auth/internal/dependencies"
+	"octodome/internal/auth/internal/domain/validator"
 	"octodome/internal/auth/internal/infrastructure/migration"
 	"octodome/internal/auth/internal/infrastructure/repository"
 	"octodome/internal/auth/internal/infrastructure/security"
@@ -21,17 +23,28 @@ func Initialize(r chi.Router, db *gorm.DB) {
 }
 
 func createAuthController(db *gorm.DB) *http.AuthController {
-	userRepo := userinfra.NewPgUserRepository(db)
-	authRepo := repository.NewPgRole(db)
+	userReader := userinfra.NewPgUserRepository(db)
+	roleRepo := repository.NewPgRole(db)
 	tokenGenerator := security.NewJwtTokenGenerator()
 	passwordHasher := security.NewBcryptPasswordHasher()
+	validator := validator.NewRoleValidator(roleRepo)
 
-	authenticateHandler := auth.NewAuthenticateHandler(userRepo, tokenGenerator, passwordHasher)
-	assignRoleHandler := auth.NewAssignRoleHandler(authRepo)
+	deps := dependencies.NewContainer(
+		userReader,
+		roleRepo,
+		tokenGenerator,
+		passwordHasher,
+		validator,
+	)
+
+	authenticateHandler := auth.NewAuthenticateHandler(deps)
+	assignRoleHandler := auth.NewAssignRoleHandler(deps)
+	unassignRoleHandler := auth.NewUnassignRoleHandler(deps)
 
 	return http.NewAuthController(
 		authenticateHandler,
 		assignRoleHandler,
+		unassignRoleHandler,
 	)
 }
 

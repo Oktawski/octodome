@@ -3,21 +3,20 @@ package hdl
 import (
 	"errors"
 	cmd "octodome/internal/equipment/internal/application/command"
+	"octodome/internal/equipment/internal/dependencies"
 	domain "octodome/internal/equipment/internal/domain/equipmenttype"
 )
 
 type DeleteHandler struct {
-	validator domain.Validator
 	repo      domain.Repository
+	validator domain.Validator
 }
 
-func NewDeleteHandler(
-	validator domain.Validator,
-	repository domain.Repository) *DeleteHandler {
+func NewDeleteHandler(deps dependencies.EquipmentTypeContainer) *DeleteHandler {
 
 	return &DeleteHandler{
-		validator: validator,
-		repo:      repository,
+		repo:      deps.Repository,
+		validator: deps.Validator,
 	}
 }
 
