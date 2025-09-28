@@ -26,7 +26,6 @@ func NewUnassignRoleHandler(deps dependencies.Container) UnassignRoleHandler {
 	return &unassignRoleHandler{repo: deps.RoleRepository, validator: deps.RoleValidator}
 }
 
-// Handle implements UnassignRoleHandler.
 func (h *unassignRoleHandler) Handle(cmd UnassignRoleCommand) error {
 	if err := h.validator.CanBeUnassigned(
 		cmd.Role,
@@ -35,6 +34,7 @@ func (h *unassignRoleHandler) Handle(cmd UnassignRoleCommand) error {
 		return err
 	}
 
-	// err := h.repo.UnassignRole(cmd.Role, cmd.UserID)
-	panic("not implemented")
+	err := h.repo.UnassignRole(cmd.Role, cmd.UserID)
+
+	return err
 }

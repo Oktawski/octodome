@@ -40,11 +40,13 @@ func createAuthController(db *gorm.DB) *http.AuthController {
 	authenticateHandler := auth.NewAuthenticateHandler(deps)
 	assignRoleHandler := auth.NewAssignRoleHandler(deps)
 	unassignRoleHandler := auth.NewUnassignRoleHandler(deps)
+	syncRolesHandler := auth.NewSyncRolesHandler(deps)
 
 	return http.NewAuthController(
 		authenticateHandler,
 		assignRoleHandler,
 		unassignRoleHandler,
+		syncRolesHandler,
 	)
 }
 
@@ -58,5 +60,7 @@ func registerRoutes(r chi.Router, db *gorm.DB, ctrl *http.AuthController) {
 		authAdmin.Use(middleware.RequireRoles(domain.RoleAdmin))
 
 		authAdmin.Post("/assign-role", ctrl.AssignRole)
+		authAdmin.Post("/unassign-role", ctrl.UnassignRole)
+		authAdmin.Post("/sync-roles", ctrl.SyncRoles)
 	})
 }

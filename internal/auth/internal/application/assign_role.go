@@ -1,12 +1,10 @@
 package auth
 
 import (
-	"fmt"
 	domainshared "octodome/internal/auth/domain"
 	"octodome/internal/auth/internal/dependencies"
 	domain "octodome/internal/auth/internal/domain/repository"
 	"octodome/internal/auth/internal/domain/validator"
-	"strings"
 )
 
 type AssignRoleCommand struct {
@@ -32,10 +30,8 @@ func NewAssignRoleHandler(deps dependencies.Container) AssignRoleHandler {
 }
 
 func (h *assignRoleHandler) Handle(c AssignRoleCommand) error {
-	if !h.validator.CanBeUsed(c.Role) {
-		return fmt.Errorf(
-			"role cannot be used. available roles: %s",
-			strings.Join(domainshared.AvailableRolesStr, ", "))
+	if err := h.validator.CanBeUsed(c.Role); err != nil {
+		return err
 	}
 
 	err := h.repo.AssignRole(c.Role, c.UserID)
