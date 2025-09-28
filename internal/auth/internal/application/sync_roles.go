@@ -6,6 +6,7 @@ import (
 	domain "octodome/internal/auth/internal/domain/repository"
 	"octodome/internal/auth/internal/domain/validator"
 	"octodome/internal/core/collection"
+	"sync"
 )
 
 type SyncRolesCommand struct {
@@ -63,17 +64,28 @@ func getRolesToAddAndDelete(
 	current, desired map[domainshared.RoleName]struct{},
 ) ([]domainshared.RoleName, []domainshared.RoleName) {
 	var toAdd, toRemove []domainshared.RoleName
-	for role := range desired {
-		if _, found := current[role]; !found {
-			toAdd = append(toAdd, role)
-		}
-	}
 
-	for role := range current {
-		if _, found := desired[role]; !found {
-			toRemove = append(toRemove, role)
-		}
-	}
+	var wg sync.WaitGroup
+	wg.Add(2)
 
+	go func() {
+		defer wg.Done()
+		for role := range desired {
+			if _, found := current[role]; !found {
+				toAdd = append(toAdd, role)
+			}
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		for role := range current {
+			if _, found := desired[role]; !found {
+				toRemove = append(toRemove, role)
+			}
+		}
+	}()
+
+	wg.Wait()
 	return toAdd, toRemove
 }
