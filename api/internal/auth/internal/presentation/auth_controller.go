@@ -2,10 +2,12 @@ package http
 
 import (
 	"net/http"
+
 	"octodome.com/api/internal/auth/domain"
 	auth "octodome.com/api/internal/auth/internal/application"
-	"octodome.com/shared/collection"
 	corehttp "octodome.com/api/internal/core/http"
+	"octodome.com/shared/collection"
+	sharedhttp "octodome.com/shared/http"
 )
 
 type AuthController struct {
@@ -32,8 +34,8 @@ func NewAuthController(
 func (ctrl *AuthController) Authenticate(w http.ResponseWriter, r *http.Request) {
 	var request AuthRequest
 
-	if err := corehttp.ParseJSON(r, &request); err != nil {
-		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid request body")
+	if err := sharedhttp.ParseJSON(r, &request); err != nil {
+		sharedhttp.WriteJSONError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
@@ -44,19 +46,19 @@ func (ctrl *AuthController) Authenticate(w http.ResponseWriter, r *http.Request)
 
 	token, err := ctrl.AuthenticateHandler.Handle(authCommand)
 	if err != nil {
-		corehttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		sharedhttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	corehttp.WriteJSON(w, http.StatusOK, token)
+	sharedhttp.WriteJSON(w, http.StatusOK, token)
 }
 
 func (ctrl *AuthController) AssignRole(w http.ResponseWriter, r *http.Request) {
 	userContext, _ := corehttp.GetUserContext(r)
 
 	var request AssignRoleRequest
-	if err := corehttp.ParseJSON(r, &request); err != nil {
-		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid request body")
+	if err := sharedhttp.ParseJSON(r, &request); err != nil {
+		sharedhttp.WriteJSONError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
@@ -68,19 +70,19 @@ func (ctrl *AuthController) AssignRole(w http.ResponseWriter, r *http.Request) {
 
 	err := ctrl.AssignRoleHandler.Handle(cmd)
 	if err != nil {
-		corehttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		sharedhttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	corehttp.WriteJSON(w, http.StatusOK, nil)
+	sharedhttp.WriteJSON(w, http.StatusOK, nil)
 }
 
 func (ctrl *AuthController) UnassignRole(w http.ResponseWriter, r *http.Request) {
 	userContext, _ := corehttp.GetUserContext(r)
 
 	var request UnassignRoleRequest
-	if err := corehttp.ParseJSON(r, &request); err != nil {
-		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid request body")
+	if err := sharedhttp.ParseJSON(r, &request); err != nil {
+		sharedhttp.WriteJSONError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
@@ -92,19 +94,19 @@ func (ctrl *AuthController) UnassignRole(w http.ResponseWriter, r *http.Request)
 
 	err := ctrl.UnassignRoleHandler.Handle(cmd)
 	if err != nil {
-		corehttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		sharedhttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	corehttp.WriteJSON(w, http.StatusOK, nil)
+	sharedhttp.WriteJSON(w, http.StatusOK, nil)
 }
 
 func (ctrl *AuthController) SyncRoles(w http.ResponseWriter, r *http.Request) {
 	userContext, _ := corehttp.GetUserContext(r)
 
 	var request SyncRolesRequest
-	if err := corehttp.ParseJSON(r, &request); err != nil {
-		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid request body")
+	if err := sharedhttp.ParseJSON(r, &request); err != nil {
+		sharedhttp.WriteJSONError(w, http.StatusBadRequest, "invalid request body")
 		return
 	}
 
@@ -118,9 +120,9 @@ func (ctrl *AuthController) SyncRoles(w http.ResponseWriter, r *http.Request) {
 
 	err := ctrl.SyncRolesHandler.Handle(cmd)
 	if err != nil {
-		corehttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		sharedhttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	corehttp.WriteJSON(w, http.StatusOK, nil)
+	sharedhttp.WriteJSON(w, http.StatusOK, nil)
 }

@@ -2,8 +2,9 @@ package http
 
 import (
 	"net/http"
-	corehttp "octodome.com/api/internal/core/http"
+
 	user "octodome.com/api/internal/user/internal/application"
+	corehttp "octodome.com/shared/http"
 )
 
 type UserController struct {
