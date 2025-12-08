@@ -2,7 +2,7 @@ package qry
 
 import (
 	authdom "octodome.com/api/internal/auth/domain"
-	"octodome.com/api/internal/core"
+	"octodome.com/shared/collection"
 )
 
 type EquipmentGetByID struct {
@@ -11,6 +11,6 @@ type EquipmentGetByID struct {
 }
 
 type EquipmentGetList struct {
-	Pagination core.Pagination
+	Pagination collection.Pagination
 	User       authdom.UserContext
 }

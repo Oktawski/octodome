@@ -2,11 +2,6 @@ package core
 
 import "gorm.io/gorm"
 
-type Pagination struct {
-	Page     int
-	PageSize int
-}
-
 func Paginate(page int, pageSize int) func(db *gorm.DB) *gorm.DB {
 	return func(db *gorm.DB) *gorm.DB {
 		if page < 1 {

@@ -22,14 +22,8 @@ func StartServer() {
 		log.Fatal("Failed to connect to database: ", err)
 	}
 
-	eventDsn := "host=localhost user=sa password=pass123 dbname=octodome_event_db port=5433 sslmode=disable"
-	eventDb, err := gorm.Open(postgres.Open(eventDsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("Failed to connect to event database: ", err)
-	}
-
 	authmod.Initialize(r, db)
-	usermod.Initialize(r, db, eventDb)
+	usermod.Initialize(r, db)
 	equipmentmod.Initialize(r, db)
 
 	http.ListenAndServe(":8989", r)

@@ -1,11 +1,7 @@
 package user
 
 import (
-	"time"
-
 	"octodome.com/api/internal/user/domain"
-	eventpublisher "octodome.com/eventbroker/eventpublisher"
-	"octodome.com/shared/events"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,15 +13,13 @@ type Create struct {
 }
 
 type CreateHandler struct {
-	repo           domain.Repository
-	eventPublisher eventpublisher.Publisher
+	repo domain.Repository
 }
 
 func NewCreateHandler(
 	repository domain.Repository,
-	eventPublisher eventpublisher.Publisher,
 ) *CreateHandler {
-	return &CreateHandler{repo: repository, eventPublisher: eventPublisher}
+	return &CreateHandler{repo: repository}
 }
 
 func (handler *CreateHandler) Handle(c Create) error {
@@ -40,17 +34,10 @@ func (handler *CreateHandler) Handle(c Create) error {
 		PasswordHash: passwordHash,
 	}
 
-	userID, err := handler.repo.Create(userModel)
+	_, err = handler.repo.Create(userModel)
 	if err != nil {
 		return err
 	}
-
-	handler.eventPublisher.Publish(events.UserRegistered{
-		UserID:       userID,
-		Email:        c.Email,
-		Name:         c.Name,
-		RegisteredAt: time.Now().UTC(),
-	})
 
 	return nil
 }

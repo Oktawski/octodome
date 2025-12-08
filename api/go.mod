@@ -4,15 +4,12 @@ go 1.25.0
 
 replace octodome.com/shared => ../internal
 
-replace octodome.com/eventbroker => ../event_broker
-
 require (
-	github.com/go-chi/chi/v5 v5.2.2
+	github.com/go-chi/chi/v5 v5.2.3
 	github.com/golang-jwt/jwt/v5 v5.2.3
 	golang.org/x/crypto v0.40.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.30.0
-	octodome.com/eventbroker v0.0.0-00010101000000-000000000000
 	octodome.com/shared v0.0.0-00010101000000-000000000000
 )
 

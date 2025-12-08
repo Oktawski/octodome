@@ -6,26 +6,21 @@ import (
 	infra "octodome.com/api/internal/user/internal/infrastructure"
 	http "octodome.com/api/internal/user/internal/presentation"
 	"octodome.com/api/internal/web/middleware"
-	eventpublisher "octodome.com/eventbroker/eventpublisher"
-	eventinfra "octodome.com/eventbroker/infrastructure"
 
 	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
 )
 
-func Initialize(r chi.Router, db *gorm.DB, eventDb *gorm.DB) {
+func Initialize(r chi.Router, db *gorm.DB) {
 	infra.Migrate(db)
 
-	eventinfra.Migrate(eventDb)
-
-	registerRoutes(r, db, initializeController(db, eventDb))
+	registerRoutes(r, db, initializeController(db))
 }
 
-func initializeController(db *gorm.DB, eventDb *gorm.DB) *http.UserController {
+func initializeController(db *gorm.DB) *http.UserController {
 	userRepo := infra.NewPgUserRepository(db)
 
-	eventPublisher := eventpublisher.NewEventPublisher(eventDb)
-	userCreateHandler := user.NewCreateHandler(userRepo, eventPublisher)
+	userCreateHandler := user.NewCreateHandler(userRepo)
 	userGetByID := user.NewUserGetByIDHandler(userRepo)
 
 	return http.NewUserController(userCreateHandler, userGetByID)

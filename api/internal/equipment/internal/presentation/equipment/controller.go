@@ -2,10 +2,12 @@ package http
 
 import (
 	"net/http"
+
 	corehttp "octodome.com/api/internal/core/http"
 	cmd "octodome.com/api/internal/equipment/internal/application/command"
 	hdl "octodome.com/api/internal/equipment/internal/application/handler/equipment"
 	qry "octodome.com/api/internal/equipment/internal/application/query"
+	sharedhttp "octodome.com/shared/http"
 )
 
 type EquipmentController struct {
@@ -34,25 +36,25 @@ func NewEquipmentController(
 
 func (c *EquipmentController) GetEquipmentList(w http.ResponseWriter, r *http.Request) {
 	user, _ := corehttp.GetUserContext(r)
-	pagination := corehttp.GetPagination(r)
+	pagination := sharedhttp.GetPagination(r)
 
 	query := qry.EquipmentGetList{Pagination: pagination, User: *user}
 
 	equipments, totalCount, err := c.getListHandler.Handle(query)
 	if err != nil {
-		corehttp.WriteJSONError(w, http.StatusNotFound, "could not fetch equipments")
+		sharedhttp.WriteJSONError(w, http.StatusNotFound, "could not fetch equipments")
 		return
 	}
 
 	response := &GetListResponse{Equipments: equipments, TotalCount: totalCount}
-	corehttp.WriteJSON(w, http.StatusOK, response)
+	sharedhttp.WriteJSON(w, http.StatusOK, response)
 }
 
 func (c *EquipmentController) GetEquipment(w http.ResponseWriter, r *http.Request) {
 	user, _ := corehttp.GetUserContext(r)
-	equipmentID, err := corehttp.GetID(r)
+	equipmentID, err := sharedhttp.GetID(r)
 	if err != nil {
-		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid equipment ID")
+		sharedhttp.WriteJSONError(w, http.StatusBadRequest, "invalid equipment ID")
 		return
 	}
 
@@ -60,19 +62,19 @@ func (c *EquipmentController) GetEquipment(w http.ResponseWriter, r *http.Reques
 
 	equipment, err := c.getByIDHandler.Handle(query)
 	if err != nil {
-		corehttp.WriteJSONError(w, http.StatusNotFound, "could not fetch equipment")
+		sharedhttp.WriteJSONError(w, http.StatusNotFound, "could not fetch equipment")
 		return
 	}
 
-	corehttp.WriteJSON(w, http.StatusOK, equipment)
+	sharedhttp.WriteJSON(w, http.StatusOK, equipment)
 }
 
 func (c *EquipmentController) CreateEquipment(w http.ResponseWriter, r *http.Request) {
 	user, _ := corehttp.GetUserContext(r)
 
 	var request CreateRequest
-	if err := corehttp.ParseJSON(r, &request); err != nil {
-		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid request payload")
+	if err := sharedhttp.ParseJSON(r, &request); err != nil {
+		sharedhttp.WriteJSONError(w, http.StatusBadRequest, "invalid request payload")
 		return
 	}
 
@@ -83,24 +85,24 @@ func (c *EquipmentController) CreateEquipment(w http.ResponseWriter, r *http.Req
 		UserContext: *user,
 	}
 	if err := c.createHandler.Handle(command); err != nil {
-		corehttp.WriteJSONError(w, http.StatusConflict, "could not create equipment")
+		sharedhttp.WriteJSONError(w, http.StatusConflict, "could not create equipment")
 		return
 	}
 
-	corehttp.WriteJSON(w, http.StatusCreated, nil)
+	sharedhttp.WriteJSON(w, http.StatusCreated, nil)
 }
 
 func (c *EquipmentController) UpdateEquipment(w http.ResponseWriter, r *http.Request) {
 	user, _ := corehttp.GetUserContext(r)
-	equipmentID, err := corehttp.GetID(r)
+	equipmentID, err := sharedhttp.GetID(r)
 	if err != nil {
-		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid equipment ID")
+		sharedhttp.WriteJSONError(w, http.StatusBadRequest, "invalid equipment ID")
 		return
 	}
 
 	var dto UpdateRequest
-	if err := corehttp.ParseJSON(r, &dto); err != nil {
-		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid request payload")
+	if err := sharedhttp.ParseJSON(r, &dto); err != nil {
+		sharedhttp.WriteJSONError(w, http.StatusBadRequest, "invalid request payload")
 		return
 	}
 
@@ -112,18 +114,18 @@ func (c *EquipmentController) UpdateEquipment(w http.ResponseWriter, r *http.Req
 		UserContext: *user,
 	}
 	if err := c.updateHandler.Handle(command); err != nil {
-		corehttp.WriteJSONError(w, http.StatusConflict, "could not update equipment")
+		sharedhttp.WriteJSONError(w, http.StatusConflict, "could not update equipment")
 		return
 	}
 
-	corehttp.WriteJSON(w, http.StatusNoContent, nil)
+	sharedhttp.WriteJSON(w, http.StatusNoContent, nil)
 }
 
 func (c *EquipmentController) DeleteEquipment(w http.ResponseWriter, r *http.Request) {
 	user, _ := corehttp.GetUserContext(r)
-	equipmentID, err := corehttp.GetID(r)
+	equipmentID, err := sharedhttp.GetID(r)
 	if err != nil {
-		corehttp.WriteJSONError(w, http.StatusBadRequest, "invalid equipment ID")
+		sharedhttp.WriteJSONError(w, http.StatusBadRequest, "invalid equipment ID")
 		return
 	}
 
@@ -132,9 +134,9 @@ func (c *EquipmentController) DeleteEquipment(w http.ResponseWriter, r *http.Req
 		UserContext: *user,
 	}
 	if err := c.deleteHandler.Handle(command); err != nil {
-		corehttp.WriteJSONError(w, http.StatusConflict, "could not delete equipment")
+		sharedhttp.WriteJSONError(w, http.StatusConflict, "could not delete equipment")
 		return
 	}
 
-	corehttp.WriteJSON(w, http.StatusNoContent, nil)
+	sharedhttp.WriteJSON(w, http.StatusNoContent, nil)
 }

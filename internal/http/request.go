@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"octodome.com/api/internal/core"
 	"strconv"
 
 	"github.com/go-chi/chi/v5"
+	"octodome.com/shared/collection"
 )
 
 func ParseJSON(r *http.Request, v any) error {
@@ -108,11 +108,11 @@ func GetQueryParamOrDefault[T any](
 	return result.(T)
 }
 
-func GetPagination(r *http.Request) core.Pagination {
+func GetPagination(r *http.Request) collection.Pagination {
 	page := GetQueryParamOrDefault(r, "page", 1)
 	pageSize := GetQueryParamOrDefault(r, "pageSize", 100)
 
-	return core.Pagination{
+	return collection.Pagination{
 		Page:     page,
 		PageSize: pageSize,
 	}
