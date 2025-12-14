@@ -1,11 +1,14 @@
 package user
 
 import (
+	"context"
+
 	"octodome.com/api/internal/user/domain"
 )
 
 type GetByID struct {
-	ID uint
+	Context context.Context
+	ID      uint
 }
 
 type GetByIDHandler struct {
@@ -17,7 +20,7 @@ func NewUserGetByIDHandler(repo domain.Repository) *GetByIDHandler {
 }
 
 func (handler *GetByIDHandler) Handle(q GetByID) (*domain.UserDTO, error) {
-	user, err := handler.repo.GetByID(q.ID)
+	user, err := handler.repo.GetByID(q.Context, q.ID)
 	if err != nil {
 		return nil, err
 	}

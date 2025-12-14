@@ -1,6 +1,8 @@
 package domain
 
+import "context"
+
 type Repository interface {
-	GetByID(id uint) (*User, error)
-	Create(user *User) (uint, error)
+	GetByID(ctx context.Context, id uint) (*User, error)
+	Create(ctx context.Context, user *User) (uint, error)
 }

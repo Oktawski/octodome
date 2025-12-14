@@ -1,6 +1,7 @@
 package infra
 
 import (
+	"context"
 	"encoding/json"
 	"time"
 
@@ -17,18 +18,22 @@ func NewEventPublisher(db *gorm.DB) domain.Publisher {
 	return &publisher{db: db}
 }
 
-func (p *publisher) Publish(eventType events.EventType, payload interface{}) error {
+func (p *publisher) Publish(
+	ctx context.Context,
+	eventType events.EventType,
+	payload interface{},
+) error {
 	payloadJSON, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}
 
-	event := &event{
+	eventModel := &event{
 		Type:      string(eventType),
 		Payload:   payloadJSON,
 		CreatedAt: time.Now(),
 		Status:    string(events.EventStatusPending),
 	}
 
-	return p.db.Create(&event).Error
+	return gorm.G[event](p.db).Create(ctx, eventModel)
 }

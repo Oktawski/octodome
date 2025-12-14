@@ -40,6 +40,7 @@ func (ctrl *AuthController) Authenticate(w http.ResponseWriter, r *http.Request)
 	}
 
 	authCommand := auth.AuthenticateCommand{
+		Context:  r.Context(),
 		Username: request.Username,
 		Password: request.Password,
 	}
@@ -63,6 +64,7 @@ func (ctrl *AuthController) AssignRole(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cmd := auth.AssignRoleCommand{
+		Context:     r.Context(),
 		Role:        domain.RoleName(request.Role),
 		UserID:      request.UserID,
 		UserContext: *userContext,
@@ -87,6 +89,7 @@ func (ctrl *AuthController) UnassignRole(w http.ResponseWriter, r *http.Request)
 	}
 
 	cmd := auth.UnassignRoleCommand{
+		Context:     r.Context(),
 		Role:        domain.RoleName(request.Role),
 		UserID:      request.UserID,
 		UserContext: *userContext,
@@ -111,6 +114,7 @@ func (ctrl *AuthController) SyncRoles(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cmd := auth.SyncRolesCommand{
+		Context: r.Context(),
 		Roles: collection.Map(request.Roles, func(e string) domain.RoleName {
 			return domain.RoleName(e)
 		}),

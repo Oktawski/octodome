@@ -1,7 +1,11 @@
 package domain
 
-import "octodome.com/shared/events"
+import (
+	"context"
+
+	"octodome.com/shared/events"
+)
 
 type Publisher interface {
-	Publish(eventType events.EventType, payload interface{}) error
+	Publish(ctx context.Context, eventType events.EventType, payload interface{}) error
 }

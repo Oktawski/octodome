@@ -1,7 +1,9 @@
 package repository
 
 import (
+	"context"
 	"fmt"
+
 	"octodome.com/api/internal/auth/domain"
 	"octodome.com/api/internal/auth/internal/infrastructure/model"
 	"octodome.com/shared/collection"
@@ -17,10 +19,10 @@ func NewPgRole(db *gorm.DB) *pgRole {
 	return &pgRole{db: db}
 }
 
-func (r *pgRole) GetRolesByUserID(userID uint) ([]domain.RoleDTO, error) {
+func (r *pgRole) GetRolesByUserID(ctx context.Context, userID uint) ([]domain.RoleDTO, error) {
 	var roles []model.Role
 
-	result := r.db.Table("roles").
+	result := r.db.WithContext(ctx).Table("roles").
 		Select("roles.name").
 		Joins("join user_roles on user_roles.role_id = roles.name").
 		Where("user_roles.user_id = ?", userID).
@@ -37,39 +39,36 @@ func (r *pgRole) GetRolesByUserID(userID uint) ([]domain.RoleDTO, error) {
 	}), nil
 }
 
-func (r *pgRole) AssignRole(role domain.RoleName, userID uint) error {
-	var dbRole model.Role
-	if err := r.db.Model(&model.Role{}).
+func (r *pgRole) AssignRole(ctx context.Context, role domain.RoleName, userID uint) error {
+	_, err := gorm.G[model.Role](r.db).
 		Where("name = ?", role).
-		First(&dbRole).
-		Error; err != nil {
+		First(ctx)
+	if err != nil {
 		return fmt.Errorf("role %s does not exist", role)
 	}
 
-	var count int64
-	if err := r.db.Model(&model.UserRole{}).
+	userRoleCount, err := gorm.G[model.UserRole](r.db).
 		Where("user_id = ? AND role_id = ?", userID, role).
-		Count(&count).
-		Error; err != nil {
+		Count(ctx, "role_id")
+	if err != nil {
 		return err
 	}
-	if count > 0 {
+	if userRoleCount > 0 {
 		return fmt.Errorf("user already has role %s", role)
 	}
 
 	userRole := &model.UserRole{
-		UserID: userID,
 		RoleID: string(role),
+		UserID: userID,
 	}
 
 	if err := r.db.Create(&userRole).Error; err != nil {
 		return err
 	}
-
 	return nil
 }
 
-func (r *pgRole) UnassignRole(role domain.RoleName, userID uint) error {
+func (r *pgRole) UnassignRole(ctx context.Context, role domain.RoleName, userID uint) error {
 	err := r.db.
 		Model(&model.UserRole{}).
 		Where("role_id = ? AND user_id = ?", role, userID).
@@ -79,6 +78,7 @@ func (r *pgRole) UnassignRole(role domain.RoleName, userID uint) error {
 }
 
 func (r *pgRole) SyncRoles(
+	ctx context.Context,
 	rolesToAdd []domain.RoleName,
 	rolesToRemove []domain.RoleName,
 	userID uint,

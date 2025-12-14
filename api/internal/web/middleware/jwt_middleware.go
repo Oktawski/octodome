@@ -64,7 +64,7 @@ func extractUserFromJwt(r *http.Request, db *gorm.DB) (*authdom.UserContext, err
 	}
 
 	repo := authprovider.ProvideRoleReader(db)
-	roles, err := repo.GetRolesByUserID(claims.UserID)
+	roles, err := repo.GetRolesByUserID(r.Context(), claims.UserID)
 	if err != nil {
 		return nil, err
 	}

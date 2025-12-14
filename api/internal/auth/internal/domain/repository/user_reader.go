@@ -1,7 +1,11 @@
 package repository
 
-import "octodome.com/api/internal/auth/domain"
+import (
+	"context"
+
+	"octodome.com/api/internal/auth/domain"
+)
 
 type UserReader interface {
-	GetUserAuthDTO(username string) (*domain.UserAuthDTO, error)
+	GetUserAuthDTO(ctx context.Context, username string) (*domain.UserAuthDTO, error)
 }

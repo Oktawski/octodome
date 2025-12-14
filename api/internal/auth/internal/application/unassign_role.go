@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"context"
+
 	domainshared "octodome.com/api/internal/auth/domain"
 	"octodome.com/api/internal/auth/internal/dependencies"
 	domain "octodome.com/api/internal/auth/internal/domain/repository"
@@ -8,6 +10,7 @@ import (
 )
 
 type UnassignRoleCommand struct {
+	Context     context.Context
 	Role        domainshared.RoleName
 	UserID      uint
 	UserContext domainshared.UserContext
@@ -34,7 +37,7 @@ func (h *unassignRoleHandler) Handle(cmd UnassignRoleCommand) error {
 		return err
 	}
 
-	err := h.repo.UnassignRole(cmd.Role, cmd.UserID)
+	err := h.repo.UnassignRole(cmd.Context, cmd.Role, cmd.UserID)
 
 	return err
 }

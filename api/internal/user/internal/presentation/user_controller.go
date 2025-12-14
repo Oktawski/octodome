@@ -28,7 +28,7 @@ func (ctrl *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	query := user.GetByID{ID: uint(id)}
+	query := user.GetByID{Context: r.Context(), ID: uint(id)}
 	user, err := ctrl.getByIDHandler.Handle(query)
 	if err != nil {
 		corehttp.WriteJSONError(w, http.StatusNotFound, "User not found")
@@ -49,6 +49,8 @@ func (ctrl *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 		corehttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	command.Context = r.Context()
 
 	// TODO: extend by ID
 	corehttp.WriteJSON(w, http.StatusCreated, command)

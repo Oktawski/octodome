@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"sync"
 
 	domainshared "octodome.com/api/internal/auth/domain"
@@ -11,6 +12,7 @@ import (
 )
 
 type SyncRolesCommand struct {
+	Context     context.Context
 	Roles       []domainshared.RoleName
 	UserID      uint
 	UserContext domainshared.UserContext
@@ -39,7 +41,7 @@ func (h *syncRolesHandler) Handle(cmd SyncRolesCommand) error {
 		}
 	}
 
-	currentRoleDTOs, err := h.repo.GetRolesByUserID(cmd.UserID)
+	currentRoleDTOs, err := h.repo.GetRolesByUserID(cmd.Context, cmd.UserID)
 	if err != nil {
 		return err
 	}
@@ -58,7 +60,7 @@ func (h *syncRolesHandler) Handle(cmd SyncRolesCommand) error {
 		desiredRolesMap,
 	)
 
-	return h.repo.SyncRoles(rolesToAdd, rolesToRemove, cmd.UserID)
+	return h.repo.SyncRoles(cmd.Context, rolesToAdd, rolesToRemove, cmd.UserID)
 }
 
 func getRolesToAddAndDelete(

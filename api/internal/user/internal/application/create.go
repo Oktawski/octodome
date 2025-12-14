@@ -1,12 +1,15 @@
 package user
 
 import (
+	"context"
+
 	"octodome.com/api/internal/user/domain"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 type Create struct {
+	Context  context.Context
 	Name     string
 	Email    string
 	Password string
@@ -34,7 +37,7 @@ func (handler *CreateHandler) Handle(c Create) error {
 		PasswordHash: passwordHash,
 	}
 
-	_, err = handler.repo.Create(userModel)
+	_, err = handler.repo.Create(c.Context, userModel)
 	if err != nil {
 		return err
 	}

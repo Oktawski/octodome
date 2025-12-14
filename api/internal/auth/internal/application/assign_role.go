@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"context"
+
 	domainshared "octodome.com/api/internal/auth/domain"
 	"octodome.com/api/internal/auth/internal/dependencies"
 	domain "octodome.com/api/internal/auth/internal/domain/repository"
@@ -8,6 +10,7 @@ import (
 )
 
 type AssignRoleCommand struct {
+	Context     context.Context
 	Role        domainshared.RoleName
 	UserID      uint
 	UserContext domainshared.UserContext
@@ -34,6 +37,6 @@ func (h *assignRoleHandler) Handle(c AssignRoleCommand) error {
 		return err
 	}
 
-	err := h.repo.AssignRole(c.Role, c.UserID)
+	err := h.repo.AssignRole(c.Context, c.Role, c.UserID)
 	return err
 }

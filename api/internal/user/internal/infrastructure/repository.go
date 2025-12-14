@@ -1,6 +1,8 @@
 package infra
 
 import (
+	"context"
+
 	"octodome.com/api/internal/user/domain"
 	infra "octodome.com/api/internal/user/infrastructure"
 
@@ -15,7 +17,7 @@ func NewPgUserRepository(db *gorm.DB) *pgUserRepository {
 	return &pgUserRepository{db: db}
 }
 
-func (r *pgUserRepository) GetByID(id uint) (*domain.User, error) {
+func (r *pgUserRepository) GetByID(ctx context.Context, id uint) (*domain.User, error) {
 	var u infra.User
 
 	result := r.db.First(&u, id)
@@ -23,23 +25,21 @@ func (r *pgUserRepository) GetByID(id uint) (*domain.User, error) {
 	return u.ToDomain(), result.Error
 }
 
-func (r *pgUserRepository) GetUserByUsername(username string) (*domain.User, error) {
-	var model *infra.User
-
-	dbError := r.db.Where("username = ?", username).First(&model).Error
-	if dbError != nil {
-		return nil, dbError
+func (r *pgUserRepository) GetUserByUsername(ctx context.Context, username string) (*domain.User, error) {
+	user, err := gorm.G[infra.User](r.db).Where("username = ?", username).First(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	return model.ToDomain(), nil
+	return user.ToDomain(), nil
 }
 
-func (r *pgUserRepository) Create(user *domain.User) (uint, error) {
-	model := infra.FromDomain(user)
+func (r *pgUserRepository) Create(ctx context.Context, user *domain.User) (uint, error) {
+	userModel := infra.FromDomain(user)
 
-	if err := r.db.Create(model).Error; err != nil {
+	if err := gorm.G[infra.User](r.db).Create(ctx, userModel); err != nil {
 		return 0, err
 	}
 
-	return model.ID, nil
+	return userModel.ID, nil
 }

@@ -1,6 +1,8 @@
 package infra
 
 import (
+	"context"
+
 	authdom "octodome.com/api/internal/auth/domain"
 
 	"gorm.io/gorm"
@@ -14,7 +16,7 @@ func NewPgUserRepository(db *gorm.DB) *pgUserRepository {
 	return &pgUserRepository{db: db}
 }
 
-func (r *pgUserRepository) GetUserAuthDTO(username string) (*authdom.UserAuthDTO, error) {
+func (r *pgUserRepository) GetUserAuthDTO(ctx context.Context, username string) (*authdom.UserAuthDTO, error) {
 	var user authdom.UserAuthDTO
 
 	dbError := r.db.

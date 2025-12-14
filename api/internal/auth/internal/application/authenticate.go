@@ -1,12 +1,15 @@
 package auth
 
 import (
+	"context"
+
 	"octodome.com/api/internal/auth/internal/dependencies"
 	"octodome.com/api/internal/auth/internal/domain"
 	domainrepo "octodome.com/api/internal/auth/internal/domain/repository"
 )
 
 type AuthenticateCommand struct {
+	Context  context.Context
 	Username string
 	Password string
 }
@@ -30,7 +33,7 @@ func NewAuthenticateHandler(deps dependencies.Container) AuthenticateHandler {
 }
 
 func (handler *authenticateHandler) Handle(request AuthenticateCommand) (string, error) {
-	userAuthDTO, err := handler.userReader.GetUserAuthDTO(request.Username)
+	userAuthDTO, err := handler.userReader.GetUserAuthDTO(request.Context, request.Username)
 	if err != nil {
 		return "", err
 	}

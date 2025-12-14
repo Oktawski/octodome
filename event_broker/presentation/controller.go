@@ -36,7 +36,7 @@ func (c *EventController) PublishEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := c.publisher.Publish(request.EventType, request.Payload)
+	err := c.publisher.Publish(r.Context(), request.EventType, request.Payload)
 	if err != nil {
 		corehttp.WriteJSONError(w, http.StatusInternalServerError, "failed to publish event")
 		return
@@ -52,7 +52,7 @@ func (c *EventController) GetEvent(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, payload, err := c.consumer.GetEvent(eventType)
+	id, payload, err := c.consumer.GetEvent(r.Context(), eventType)
 	if err != nil {
 		corehttp.WriteJSONError(w, http.StatusNotFound, "no events found")
 		return
@@ -73,7 +73,7 @@ func (c *EventController) MarkEventAsPending(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	err = c.consumer.MarkEventAsPending(id)
+	err = c.consumer.MarkEventAsPending(r.Context(), id)
 	if err != nil {
 		corehttp.WriteJSONError(w, http.StatusConflict, err.Error())
 		return
@@ -89,7 +89,7 @@ func (c *EventController) MarkEventAsProcessing(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = c.consumer.MarkEventAsProcessing(id)
+	err = c.consumer.MarkEventAsProcessing(r.Context(), id)
 	if err != nil {
 		corehttp.WriteJSONError(w, http.StatusConflict, err.Error())
 		return
@@ -105,7 +105,7 @@ func (c *EventController) MarkEventAsProcessed(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	err = c.consumer.MarkEventAsProcessed(id)
+	err = c.consumer.MarkEventAsProcessed(r.Context(), id)
 	if err != nil {
 		corehttp.WriteJSONError(w, http.StatusConflict, err.Error())
 		return
@@ -121,7 +121,7 @@ func (c *EventController) MarkEventAsFailed(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	err = c.consumer.MarkEventAsFailed(id)
+	err = c.consumer.MarkEventAsFailed(r.Context(), id)
 	if err != nil {
 		corehttp.WriteJSONError(w, http.StatusConflict, err.Error())
 		return
