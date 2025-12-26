@@ -53,5 +53,5 @@ func (ctrl *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	command.Context = r.Context()
 
 	// TODO: extend by ID
-	corehttp.WriteJSON(w, http.StatusCreated, command)
+	corehttp.WriteJSON(w, http.StatusCreated, map[string]string{"message": "user created"})
 }

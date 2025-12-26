@@ -1,6 +1,8 @@
 package events
 
-type EventType string
+import "reflect"
+
+type EventType any
 
 type EventStatus string
 
@@ -10,3 +12,7 @@ const (
 	EventStatusProcessed  EventStatus = "processed"
 	EventStatusFailed     EventStatus = "failed"
 )
+
+func GetEventTypeName(event EventType) EventType {
+	return EventType(reflect.TypeOf(event).Name())
+}

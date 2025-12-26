@@ -8,9 +8,9 @@ import (
 
 type User struct {
 	gorm.Model
-	Email        string `gorm:"column:email"`
-	Username     string `gorm:"column:username;uniqueIndex"`
-	PasswordHash string `gorm:"column:password"`
+	Email        string `gorm:"column:email;uniqueIndex;not null"`
+	Username     string `gorm:"column:username;uniqueIndex;not null"`
+	PasswordHash string `gorm:"column:password;not null"`
 }
 
 func (User) TableName() string {

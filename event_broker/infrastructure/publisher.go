@@ -20,7 +20,7 @@ func NewEventPublisher(db *gorm.DB) domain.Publisher {
 
 func (p *publisher) Publish(
 	ctx context.Context,
-	eventType events.EventType,
+	eventType string,
 	payload interface{},
 ) error {
 	payloadJSON, err := json.Marshal(payload)
@@ -29,7 +29,7 @@ func (p *publisher) Publish(
 	}
 
 	eventModel := &event{
-		Type:      string(eventType),
+		Type:      eventType,
 		Payload:   payloadJSON,
 		CreatedAt: time.Now(),
 		Status:    string(events.EventStatusPending),

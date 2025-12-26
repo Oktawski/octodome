@@ -31,4 +31,9 @@ go.work.sum
 # .idea/
 # .vscode/
 
+# Debug binaries
+__debug_bin*
+*.test
+debug
+
 .DS_Store

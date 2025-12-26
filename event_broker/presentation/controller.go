@@ -5,13 +5,12 @@ import (
 	"net/http"
 
 	"octodome.com/eventbroker/domain"
-	"octodome.com/shared/events"
 	corehttp "octodome.com/shared/http"
 )
 
 type eventRequest struct {
-	EventType events.EventType `json:"type"`
-	Payload   json.RawMessage  `json:"payload"`
+	EventType string          `json:"type"`
+	Payload   json.RawMessage `json:"payload"`
 }
 
 type EventController struct {

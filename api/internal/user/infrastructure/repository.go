@@ -2,6 +2,7 @@ package infra
 
 import (
 	"context"
+	"errors"
 
 	authdom "octodome.com/api/internal/auth/domain"
 
@@ -30,4 +31,21 @@ func (r *pgUserRepository) GetUserAuthDTO(ctx context.Context, username string) 
 	}
 
 	return &user, nil
+}
+
+func (r *pgUserRepository) ExistsByEmailOrUsername(
+	ctx context.Context,
+	email string,
+	username string,
+) (bool, error) {
+	count, err := gorm.G[User](r.db).Where("email = ? or username = ?", email, username).Count(ctx, "ID")
+	if err != nil {
+		return false, err
+	}
+
+	if count > 0 {
+		return true, errors.New("email or username already exists")
+	}
+
+	return false, nil
 }
