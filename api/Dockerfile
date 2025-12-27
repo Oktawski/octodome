@@ -4,13 +4,15 @@ WORKDIR /app
 
 COPY ./internal ./internal
 
-COPY event_broker/go.mod event_broker/go.sum ./event_broker/
+COPY api/go.mod api/go.sum ./api/
 
-WORKDIR /app/event_broker
+WORKDIR /app/api
 RUN go mod download
 
-COPY event_broker/ ./
+COPY api/ ./
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /docker-gs-ping ./cmd/app
+
+EXPOSE 8080
 
 CMD ["/docker-gs-ping"]

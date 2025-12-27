@@ -1,0 +1,70 @@
+services:
+  octodome-db: 
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sa
+      POSTGRES_PASSWORD: pass123
+      POSTGRES_DB: octodome_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+    networks:
+      - octodome-network
+
+  octodome-event-db:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sa
+      POSTGRES_PASSWORD: pass123
+      POSTGRES_DB: octodome_event_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdataevent:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+    networks:
+      - octodome-network
+
+  api:
+    build:
+      context: ..
+      dockerfile: api/Dockerfile.debug
+    container_name: octodome-api
+    restart: unless-stopped
+    ports:
+      - "8989:8989"
+      - "2345:2345"
+    environment:
+      DATABASE_URL: "host=octodome-db user=sa password=pass123 dbname=octodome_db port=5432 sslmode=disable"
+    depends_on:
+      - octodome-db
+    networks:
+      - octodome-network
+      
+  event-broker:
+    build: 
+      context: ..
+      dockerfile: event_broker/Dockerfile.debug
+    container_name: octodome-event-broker
+    restart: unless-stopped
+    ports:
+      - "2346:2346"
+    environment:
+      DATABASE_URL: "host=octodome-event-db user=sa password=pass123 dbname=octodome_event_db port=5432 sslmode=disable"
+      PORT: "8990"
+    depends_on:
+      - octodome-event-db
+    networks:
+      - octodome-network
+
+volumes:
+  pgdata:
+  pgdataevent:
+
+networks:
+  octodome-network:
+    driver: bridge

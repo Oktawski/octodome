@@ -1,0 +1,26 @@
+FROM golang:1.25.0
+
+RUN go install github.com/go-delve/delve/cmd/dlv@latest
+
+WORKDIR /app
+
+COPY ./internal ./internal
+
+COPY api/go.mod api/go.sum ./api/
+
+WORKDIR /app/api
+RUN go mod download
+
+COPY api/ ./
+
+RUN CGO_ENABLED=0 GOOS=linux go build -gcflags="all=-N -l" -o /docker-gs-ping ./cmd/app
+
+EXPOSE 8989 2345
+
+# Run with Delve debugger
+# --listen=:2345: Delve listens on port 2345
+# --headless=true: Run in headless mode (no interactive terminal)
+# --api-version=2: Use API v2
+# --accept-multiclient: Allow multiple debugger clients
+# --check-go-version=false: Skip Go version check
+CMD ["/go/bin/dlv", "exec", "/docker-gs-ping", "--listen=:2345", "--headless=true", "--api-version=2", "--accept-multiclient", "--continue", "--check-go-version=false"]
