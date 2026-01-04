@@ -26,9 +26,11 @@ func StartServer() {
 		log.Fatal("Failed to connect to database: ", err)
 	}
 
-	authmod.Initialize(r, db)
-	usermod.Initialize(r, db)
-	equipmentmod.Initialize(r, db)
+	r.Route("/api/v1", func(r chi.Router) {
+		authmod.Initialize(r, db)
+		usermod.Initialize(r, db)
+		equipmentmod.Initialize(r, db)
+	})
 
 	http.ListenAndServe(":8989", r)
 }

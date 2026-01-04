@@ -51,7 +51,11 @@ func (ctrl *AuthController) Authenticate(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	sharedhttp.WriteJSON(w, http.StatusOK, token)
+	response := AuthenticateResponse{
+		AuthToken: token,
+	}
+
+	sharedhttp.WriteJSON(w, http.StatusOK, response)
 }
 
 func (ctrl *AuthController) AssignRole(w http.ResponseWriter, r *http.Request) {
