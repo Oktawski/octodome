@@ -1,6 +1,9 @@
+name: octodome
+
 services:
   octodome-db: 
     image: postgres:15
+    container_name: octodome-api-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: sa
@@ -14,8 +17,9 @@ services:
     networks:
       - octodome-network
 
-  octodome-event-db:
+  octodome-event-broker-db:
     image: postgres:15
+    container_name: octodome-event-broker-db
     restart: unless-stopped
     environment:
       POSTGRES_USER: sa
@@ -33,6 +37,16 @@ services:
     build:
       context: ..
       dockerfile: api/Dockerfile.debug
+    develop:
+      watch:
+        - action: rebuild
+          path: ../api
+        - action: rebuild
+          path: ../internal
+        - action: rebuild
+          path: ../api/go.mod
+        - action: rebuild
+          path: ../api/go.sum
     container_name: octodome-api
     restart: unless-stopped
     ports:
@@ -49,6 +63,16 @@ services:
     build: 
       context: ..
       dockerfile: event_broker/Dockerfile.debug
+    develop:
+      watch:
+        - action: rebuild
+          path: ../event_broker
+        - action: rebuild
+          path: ../internal
+        - action: rebuild
+          path: ../event_broker/go.mod
+        - action: rebuild
+          path: ../event_broker/go.sum
     container_name: octodome-event-broker
     restart: unless-stopped
     ports:
@@ -57,7 +81,7 @@ services:
       DATABASE_URL: "host=octodome-event-db user=sa password=pass123 dbname=octodome_event_db port=5432 sslmode=disable"
       PORT: "8990"
     depends_on:
-      - octodome-event-db
+      - octodome-event-broker-db
     networks:
       - octodome-network
 

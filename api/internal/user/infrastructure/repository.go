@@ -18,19 +18,16 @@ func NewPgUserRepository(db *gorm.DB) *pgUserRepository {
 }
 
 func (r *pgUserRepository) GetUserAuthDTO(ctx context.Context, username string) (*authdom.UserAuthDTO, error) {
-	var user authdom.UserAuthDTO
-
-	dbError := r.db.
-		Model(User{}).
-		Select("id, username, password").
-		Where("username = ?", username).
-		Take(&user).
-		Error
-	if dbError != nil {
-		return nil, dbError
+	user, err := gorm.G[User](r.db).Where("username = ?", username).First(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	return &user, nil
+	return &authdom.UserAuthDTO{
+		ID:       user.ID,
+		Username: user.Username,
+		Password: user.PasswordHash,
+	}, nil
 }
 
 func (r *pgUserRepository) ExistsByEmailOrUsername(

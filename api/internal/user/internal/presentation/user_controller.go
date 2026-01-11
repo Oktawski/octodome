@@ -40,6 +40,7 @@ func (ctrl *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 
 func (ctrl *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var command user.Create
+	command.Context = r.Context()
 	if err := corehttp.ParseJSON(r, &command); err != nil {
 		corehttp.WriteJSONError(w, http.StatusBadRequest, err.Error())
 		return
@@ -49,8 +50,6 @@ func (ctrl *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 		corehttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-
-	command.Context = r.Context()
 
 	// TODO: extend by ID
 	corehttp.WriteJSON(w, http.StatusCreated, map[string]string{"message": "user created"})

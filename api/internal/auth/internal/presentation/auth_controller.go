@@ -1,8 +1,10 @@
 package http
 
 import (
+	"errors"
 	"net/http"
 
+	"gorm.io/gorm"
 	"octodome.com/api/internal/auth/domain"
 	auth "octodome.com/api/internal/auth/internal/application"
 	corehttp "octodome.com/api/internal/core/http"
@@ -47,7 +49,11 @@ func (ctrl *AuthController) Authenticate(w http.ResponseWriter, r *http.Request)
 
 	token, err := ctrl.AuthenticateHandler.Handle(authCommand)
 	if err != nil {
-		sharedhttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			sharedhttp.WriteJSONError(w, http.StatusNotFound, "user not found")
+			return
+		}
+		sharedhttp.WriteJSONError(w, http.StatusConflict, err.Error())
 		return
 	}
 
