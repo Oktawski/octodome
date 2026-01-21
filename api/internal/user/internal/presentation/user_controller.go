@@ -43,11 +43,20 @@ func (ctrl *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (ctrl *UserController) Register(w http.ResponseWriter, r *http.Request) {
-	var command user.Register
-	command.Context = r.Context()
-	if err := corehttp.ParseJSON(r, &command); err != nil {
+	var request RegisterRequest
+	if err := corehttp.ParseJSON(r, &request); err != nil {
 		corehttp.WriteJSONError(w, http.StatusBadRequest, err.Error())
 		return
+	}
+	if err := request.Validate(); err != nil {
+		corehttp.WriteJSONError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	command := user.Register{
+		Context:  r.Context(),
+		Email:    request.Email,
+		Password: request.Password,
 	}
 
 	if err := ctrl.createHandler.Handle(command); err != nil {

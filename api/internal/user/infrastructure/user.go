@@ -9,7 +9,7 @@ import (
 type User struct {
 	gorm.Model
 	Email        string `gorm:"column:email;uniqueIndex;not null"`
-	Username     string `gorm:"column:username;uniqueIndex;not null"`
+	Username     string `gorm:"column:username;"`
 	PasswordHash string `gorm:"column:password;not null"`
 }
 

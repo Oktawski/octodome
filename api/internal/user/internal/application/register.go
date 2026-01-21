@@ -43,15 +43,14 @@ func (handler *RegisterHandler) Handle(c Register) error {
 		PasswordHash: passwordHash,
 	}
 
-	exists, err := handler.repo.ExistsByEmailOrUsername(
+	exists, err := handler.repo.ExistsByEmail(
 		c.Context,
-		userModel.Email,
-		userModel.Username)
+		userModel.Email)
 	if err != nil {
 		return err
 	}
 	if exists {
-		return errors.New("email or username already exists")
+		return errors.New("email already exists")
 	}
 
 	userID, err := handler.repo.Create(c.Context, userModel)

@@ -44,9 +44,9 @@ func (r *pgUserRepository) Create(ctx context.Context, user *domain.User) (uint,
 	return userModel.ID, nil
 }
 
-func (r *pgUserRepository) ExistsByEmailOrUsername(ctx context.Context, email string, username string) (bool, error) {
+func (r *pgUserRepository) ExistsByEmail(ctx context.Context, email string) (bool, error) {
 	count, err := gorm.G[infra.User](r.db).
-		Where("email = ? or username = ?", email, username).
+		Where("email = ?", email).
 		Count(ctx, "ID")
 	if err != nil {
 		return false, err
