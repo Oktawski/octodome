@@ -17,15 +17,15 @@ func NewPgUserRepository(db *gorm.DB) *pgUserRepository {
 	return &pgUserRepository{db: db}
 }
 
-func (r *pgUserRepository) GetUserAuthDTO(ctx context.Context, username string) (*authdom.UserAuthDTO, error) {
-	user, err := gorm.G[User](r.db).Where("username = ?", username).First(ctx)
+func (r *pgUserRepository) GetUserAuthDTO(ctx context.Context, email string) (*authdom.UserAuthDTO, error) {
+	user, err := gorm.G[User](r.db).Where("email = ?", email).First(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	return &authdom.UserAuthDTO{
 		ID:       user.ID,
-		Username: user.Username,
+		Email:    user.Email,
 		Password: user.PasswordHash,
 	}, nil
 }

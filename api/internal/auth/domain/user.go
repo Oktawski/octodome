@@ -2,6 +2,6 @@ package domain
 
 type UserAuthDTO struct {
 	ID       uint
-	Username string
+	Email    string
 	Password string
 }

@@ -7,5 +7,5 @@ import (
 )
 
 type UserReader interface {
-	GetUserAuthDTO(ctx context.Context, username string) (*domain.UserAuthDTO, error)
+	GetUserAuthDTO(ctx context.Context, email string) (*domain.UserAuthDTO, error)
 }

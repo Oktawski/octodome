@@ -22,10 +22,11 @@ func initializeController(db *gorm.DB) *http.UserController {
 	userRepo := infra.NewPgUserRepository(db)
 	eventsClient := events.NewClient("http://event-broker:8990/events")
 
-	userCreateHandler := user.NewCreateHandler(userRepo, *eventsClient)
+	userCreateHandler := user.NewRegisterHandler(userRepo, *eventsClient)
 	userGetByID := user.NewUserGetByIDHandler(userRepo)
+	resetPasswordHandler := user.NewResetPasswordHandler(userRepo, *eventsClient)
 
-	return http.NewUserController(userCreateHandler, userGetByID)
+	return http.NewUserController(userCreateHandler, userGetByID, resetPasswordHandler)
 }
 
 func registerRoutes(r chi.Router, db *gorm.DB, ctrl *http.UserController) {
@@ -33,7 +34,8 @@ func registerRoutes(r chi.Router, db *gorm.DB, ctrl *http.UserController) {
 
 	r.Route("/user", func(user chi.Router) {
 		// TODO: add rate limiting
-		user.Post("/register", ctrl.CreateUser)
+		user.Post("/register", ctrl.Register)
+		user.Post("/reset-password", ctrl.ResetPassword)
 
 		user.Group(func(admin chi.Router) {
 			admin.Use(jwtMiddleware)

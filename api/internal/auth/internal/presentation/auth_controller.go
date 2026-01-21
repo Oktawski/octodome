@@ -43,7 +43,7 @@ func (ctrl *AuthController) Authenticate(w http.ResponseWriter, r *http.Request)
 
 	authCommand := auth.AuthenticateCommand{
 		Context:  r.Context(),
-		Username: request.Username,
+		Email:    request.Email,
 		Password: request.Password,
 	}
 

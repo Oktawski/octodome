@@ -53,7 +53,7 @@ func createAuthController(db *gorm.DB) *http.AuthController {
 
 func registerRoutes(r chi.Router, db *gorm.DB, ctrl *http.AuthController) {
 	r.Route("/auth", func(auth chi.Router) {
-		auth.Post("/", ctrl.Authenticate)
+		auth.Post("/token", ctrl.Authenticate)
 	})
 
 	r.Route("/auth/admin", func(authAdmin chi.Router) {

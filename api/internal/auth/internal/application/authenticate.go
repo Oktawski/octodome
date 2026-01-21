@@ -10,7 +10,7 @@ import (
 
 type AuthenticateCommand struct {
 	Context  context.Context
-	Username string
+	Email    string
 	Password string
 }
 
@@ -33,7 +33,7 @@ func NewAuthenticateHandler(deps dependencies.Container) AuthenticateHandler {
 }
 
 func (handler *authenticateHandler) Handle(request AuthenticateCommand) (string, error) {
-	userAuthDTO, err := handler.userReader.GetUserAuthDTO(request.Context, request.Username)
+	userAuthDTO, err := handler.userReader.GetUserAuthDTO(request.Context, request.Email)
 	if err != nil {
 		return "", err
 	}

@@ -12,26 +12,26 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Create struct {
+type Register struct {
 	Context  context.Context
 	Name     string
 	Email    string
 	Password string
 }
 
-type CreateHandler struct {
+type RegisterHandler struct {
 	repo         domain.Repository
 	eventsClient events.Client
 }
 
-func NewCreateHandler(
+func NewRegisterHandler(
 	repository domain.Repository,
 	eventsClient events.Client,
-) *CreateHandler {
-	return &CreateHandler{repo: repository, eventsClient: eventsClient}
+) *RegisterHandler {
+	return &RegisterHandler{repo: repository, eventsClient: eventsClient}
 }
 
-func (handler *CreateHandler) Handle(c Create) error {
+func (handler *RegisterHandler) Handle(c Register) error {
 	passwordHash, err := handler.hashPassword(c.Password)
 	if err != nil {
 		return err
@@ -71,7 +71,7 @@ func (handler *CreateHandler) Handle(c Create) error {
 	return nil
 }
 
-func (handler *CreateHandler) hashPassword(password string) (string, error) {
+func (handler *RegisterHandler) hashPassword(password string) (string, error) {
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(hash), err
 }

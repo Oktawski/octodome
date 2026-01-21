@@ -1,10 +1,11 @@
 package security
 
 import (
-	authdomshared "octodome.com/api/internal/auth/domain"
-	authdom "octodome.com/api/internal/auth/internal/domain"
 	"os"
 	"time"
+
+	authdomshared "octodome.com/api/internal/auth/domain"
+	authdom "octodome.com/api/internal/auth/internal/domain"
 
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -20,8 +21,8 @@ var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 func (j *jwtTokenGenerator) GenerateToken(user *authdomshared.UserAuthDTO) (string, error) {
 	claims := authdomshared.UserClaims{
-		UserID:   user.ID,
-		Username: user.Username,
+		UserID: user.ID,
+		Email:  user.Email,
 		RegisteredClaims: jwt.RegisteredClaims{
 			Issuer:    "octodome",
 			Subject:   "",

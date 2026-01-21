@@ -8,16 +8,20 @@ import (
 )
 
 type UserController struct {
-	createHandler  *user.CreateHandler
-	getByIDHandler *user.GetByIDHandler
+	createHandler        *user.RegisterHandler
+	getByIDHandler       *user.GetByIDHandler
+	resetPasswordHandler *user.ResetPasswordHandler
 }
 
 func NewUserController(
-	create *user.CreateHandler,
-	getByID *user.GetByIDHandler) *UserController {
+	create *user.RegisterHandler,
+	getByID *user.GetByIDHandler,
+	resetPassword *user.ResetPasswordHandler,
+) *UserController {
 	return &UserController{
-		createHandler:  create,
-		getByIDHandler: getByID,
+		createHandler:        create,
+		getByIDHandler:       getByID,
+		resetPasswordHandler: resetPassword,
 	}
 }
 
@@ -38,8 +42,8 @@ func (ctrl *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 	corehttp.WriteJSON(w, http.StatusOK, user)
 }
 
-func (ctrl *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var command user.Create
+func (ctrl *UserController) Register(w http.ResponseWriter, r *http.Request) {
+	var command user.Register
 	command.Context = r.Context()
 	if err := corehttp.ParseJSON(r, &command); err != nil {
 		corehttp.WriteJSONError(w, http.StatusBadRequest, err.Error())
@@ -53,4 +57,21 @@ func (ctrl *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	// TODO: extend by ID
 	corehttp.WriteJSON(w, http.StatusCreated, map[string]string{"message": "user created"})
+}
+
+func (ctrl *UserController) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	var command user.ResetPassword
+	command.Context = r.Context()
+	if err := corehttp.ParseJSON(r, &command); err != nil {
+		corehttp.WriteJSONError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := ctrl.resetPasswordHandler.Handle(command)
+	if err != nil {
+		corehttp.WriteJSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	corehttp.WriteJSON(w, http.StatusOK, map[string]string{"message": "password reset"})
 }
