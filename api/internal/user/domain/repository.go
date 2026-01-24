@@ -1,9 +1,13 @@
 package domain
 
-import "context"
+import (
+	"context"
+
+	"octodome.com/shared/valuetype"
+)
 
 type Repository interface {
 	GetByID(ctx context.Context, id uint) (*User, error)
 	Create(ctx context.Context, user *User) (uint, error)
-	ExistsByEmail(ctx context.Context, email string) (bool, error)
+	ExistsByEmail(ctx context.Context, email valuetype.Email) (bool, error)
 }

@@ -5,6 +5,7 @@ import (
 
 	"octodome.com/api/internal/user/domain"
 	infra "octodome.com/api/internal/user/infrastructure"
+	"octodome.com/shared/valuetype"
 
 	"gorm.io/gorm"
 )
@@ -44,7 +45,10 @@ func (r *pgUserRepository) Create(ctx context.Context, user *domain.User) (uint,
 	return userModel.ID, nil
 }
 
-func (r *pgUserRepository) ExistsByEmail(ctx context.Context, email string) (bool, error) {
+func (r *pgUserRepository) ExistsByEmail(
+	ctx context.Context,
+	email valuetype.Email,
+) (bool, error) {
 	count, err := gorm.G[infra.User](r.db).
 		Where("email = ?", email).
 		Count(ctx, "ID")

@@ -1,10 +1,14 @@
 package events
 
-import "time"
+import (
+	"time"
+
+	"octodome.com/shared/valuetype"
+)
 
 type UserRegistered struct {
 	UserID       uint
-	Email        string
+	Email        valuetype.Email
 	Name         string
 	RegisteredAt time.Time
 }

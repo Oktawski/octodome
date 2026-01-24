@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	authdom "octodome.com/api/internal/auth/domain"
+	"octodome.com/shared/valuetype"
 
 	"gorm.io/gorm"
 )
@@ -32,7 +33,7 @@ func (r *pgUserRepository) GetUserAuthDTO(ctx context.Context, email string) (*a
 
 func (r *pgUserRepository) ExistsByEmailOrUsername(
 	ctx context.Context,
-	email string,
+	email valuetype.Email,
 	username string,
 ) (bool, error) {
 	count, err := gorm.G[User](r.db).Where("email = ? or username = ?", email, username).Count(ctx, "ID")

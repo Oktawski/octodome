@@ -2,15 +2,16 @@ package infra
 
 import (
 	"octodome.com/api/internal/user/domain"
+	"octodome.com/shared/valuetype"
 
 	"gorm.io/gorm"
 )
 
 type User struct {
 	gorm.Model
-	Email        string `gorm:"column:email;uniqueIndex;not null"`
-	Username     string `gorm:"column:username;"`
-	PasswordHash string `gorm:"column:password;not null"`
+	Email        valuetype.Email `gorm:"column:email;uniqueIndex;not null"`
+	Username     string          `gorm:"column:username;"`
+	PasswordHash string          `gorm:"column:password;not null"`
 }
 
 func (User) TableName() string {

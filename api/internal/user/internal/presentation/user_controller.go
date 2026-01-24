@@ -5,6 +5,7 @@ import (
 
 	user "octodome.com/api/internal/user/internal/application"
 	corehttp "octodome.com/shared/http"
+	"octodome.com/shared/valuetype"
 )
 
 type UserController struct {
@@ -53,9 +54,15 @@ func (ctrl *UserController) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	email, err := valuetype.NewEmail(request.Email)
+	if err != nil {
+		corehttp.WriteJSONError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
 	command := user.Register{
 		Context:  r.Context(),
-		Email:    request.Email,
+		Email:    email,
 		Password: request.Password,
 	}
 

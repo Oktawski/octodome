@@ -8,6 +8,7 @@ import (
 
 	"octodome.com/api/internal/user/domain"
 	"octodome.com/shared/events"
+	"octodome.com/shared/valuetype"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -15,7 +16,7 @@ import (
 type Register struct {
 	Context  context.Context
 	Name     string
-	Email    string
+	Email    valuetype.Email
 	Password string
 }
 

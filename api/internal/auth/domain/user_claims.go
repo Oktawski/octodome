@@ -1,9 +1,12 @@
 package domain
 
-import "github.com/golang-jwt/jwt/v5"
+import (
+	"github.com/golang-jwt/jwt/v5"
+	"octodome.com/shared/valuetype"
+)
 
 type UserClaims struct {
 	UserID uint
-	Email  string
+	Email  valuetype.Email
 	jwt.RegisteredClaims
 }
