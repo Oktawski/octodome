@@ -78,10 +78,35 @@ services:
     ports:
       - "2346:2346"
     environment:
-      DATABASE_URL: "host=octodome-event-db user=sa password=pass123 dbname=octodome_event_db port=5432 sslmode=disable"
+      DATABASE_URL: "host=octodome-event-broker-db user=sa password=pass123 dbname=octodome_event_db port=5432 sslmode=disable"
       PORT: "8990"
     depends_on:
       - octodome-event-broker-db
+    networks:
+      - octodome-network
+
+  registration-service:
+    build:
+      context: ..
+      dockerfile: registration_service/Dockerfile.debug
+    develop:
+      watch:
+        - action: rebuild
+          path: ../registration_service
+        - action: rebuild
+          path: ../internal
+        - action: rebuild
+          path: ../registration_service/go.mod
+        - action: rebuild
+          path: ../registration_service/go.sum
+    container_name: octodome-registration-service
+    restart: unless-stopped
+    ports:
+      - "2347:2347"
+    environment:
+      EVENT_BROKER_URL: "http://event-broker:8990/events"
+    depends_on:
+      - event-broker
     networks:
       - octodome-network
 

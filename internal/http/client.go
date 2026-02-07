@@ -60,9 +60,43 @@ func (c *HttpClient) Post(url string, payload any, response *any) error {
 		return err
 	}
 
-	if err := json.Unmarshal(data, response); err != nil {
-		return err
+	if response != nil && len(data) > 0 {
+		if err := json.Unmarshal(data, response); err != nil {
+			return err
+		}
 	}
 
 	return nil
+}
+
+func (c *HttpClient) Put(url string, payload any, response *any) (statusCode int, err error) {
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return 0, err
+	}
+
+	request, err := http.NewRequest("PUT", c.baseURL+url, bytes.NewBuffer(body))
+	if err != nil {
+		return 0, err
+	}
+
+	httpResponse, err := c.client.Do(request)
+	if err != nil {
+		return 0, err
+	}
+
+	defer httpResponse.Body.Close()
+
+	data, err := io.ReadAll(httpResponse.Body)
+	if err != nil {
+		return httpResponse.StatusCode, err
+	}
+
+	if response != nil && len(data) > 0 {
+		if err := json.Unmarshal(data, response); err != nil {
+			return httpResponse.StatusCode, err
+		}
+	}
+
+	return httpResponse.StatusCode, nil
 }

@@ -3,7 +3,6 @@ package user
 import (
 	"context"
 	"errors"
-	"reflect"
 	"time"
 
 	"octodome.com/api/internal/user/domain"
@@ -60,7 +59,7 @@ func (handler *RegisterHandler) Handle(c Register) error {
 	}
 
 	handler.eventsClient.PublishEvent(
-		events.EventType(reflect.TypeOf(events.UserRegistered{}).Name()),
+		events.EventType(events.UserRegistered{}.GetEventType()),
 		events.UserRegistered{
 			UserID:       userID,
 			Email:        userModel.Email,

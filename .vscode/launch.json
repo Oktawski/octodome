@@ -32,6 +32,22 @@
                     "to": "/app/event_broker"
                 }
             ]
+        },
+        {
+            "name": "Attach to Registration Service (Docker)",
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "remotePath": "/app/registration_service",
+            "port": 2347,
+            "host": "127.0.0.1",
+            "showLog": true,
+            "substitutePath": [
+                {
+                    "from": "${workspaceFolder}/registration_service",
+                    "to": "/app/registration_service"
+                }
+            ]
         }
     ]
 }
