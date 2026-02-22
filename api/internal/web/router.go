@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"os"
 
-	authmod "octodome.com/api/internal/auth"
-	equipmentmod "octodome.com/api/internal/equipment/mod"
-	usermod "octodome.com/api/internal/user"
+	auth "octodome.com/api/internal/auth"
+	equipment "octodome.com/api/internal/equipment/mod"
+	"octodome.com/api/internal/settings"
+	user "octodome.com/api/internal/user"
 
 	"github.com/go-chi/chi/v5"
 	"gorm.io/driver/postgres"
@@ -27,9 +28,10 @@ func StartServer() {
 	}
 
 	r.Route("/api/v1", func(r chi.Router) {
-		authmod.Initialize(r, db)
-		usermod.Initialize(r, db)
-		equipmentmod.Initialize(r, db)
+		auth.Initialize(r, db)
+		user.Initialize(r, db)
+		equipment.Initialize(r, db)
+		settings.Initialize(r, db)
 	})
 
 	http.ListenAndServe(":8989", r)
