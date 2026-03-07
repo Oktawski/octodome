@@ -17,7 +17,7 @@ func NewGetListHandler(deps dependencies.EquipmentContainer) *GetListHandler {
 }
 
 func (h *GetListHandler) Handle(q qry.EquipmentGetList) ([]domain.EquipmentDTO, int64, error) {
-	equipments, totalCount, err := h.repo.GetList(q.Pagination.Page, q.Pagination.PageSize, q.User)
+	equipments, totalCount, err := h.repo.GetList(q.User, q.Pagination.Page, q.Pagination.PageSize)
 	if err != nil {
 		return nil, 0, err
 	}

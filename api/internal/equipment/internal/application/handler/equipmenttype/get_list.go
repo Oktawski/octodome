@@ -12,7 +12,6 @@ type GetListHandler struct {
 }
 
 func NewGetListHandler(deps dependencies.EquipmentTypeContainer) *GetListHandler {
-
 	return &GetListHandler{
 		repo:      deps.Repository,
 		validator: deps.Validator,
@@ -20,7 +19,7 @@ func NewGetListHandler(deps dependencies.EquipmentTypeContainer) *GetListHandler
 }
 
 func (h *GetListHandler) Handle(q qry.EquipmentTypeGetList) ([]domain.EquipmentTypeDTO, int64, error) {
-	eqTypes, totalCount, err := h.repo.GetList(q.Pagination.Page, q.Pagination.PageSize, q.User)
+	eqTypes, totalCount, err := h.repo.GetList(q.User, q.Pagination.Page, q.Pagination.PageSize)
 	if err != nil {
 		return nil, 0, err
 	}

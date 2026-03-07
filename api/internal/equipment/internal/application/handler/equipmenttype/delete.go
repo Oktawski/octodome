@@ -2,6 +2,7 @@ package hdl
 
 import (
 	"errors"
+
 	cmd "octodome.com/api/internal/equipment/internal/application/command"
 	"octodome.com/api/internal/equipment/internal/dependencies"
 	domain "octodome.com/api/internal/equipment/internal/domain/equipmenttype"
@@ -22,7 +23,7 @@ func NewDeleteHandler(deps dependencies.EquipmentTypeContainer) *DeleteHandler {
 
 func (h *DeleteHandler) Handle(c cmd.EquipmentTypeDelete) error {
 
-	if !h.validator.CanBeModified(c.ID, c.UserContext) {
+	if !h.validator.CanBeModified(c.UserContext, c.ID) {
 		return errors.New("equipment type cannot be removed")
 	}
 

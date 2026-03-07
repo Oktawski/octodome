@@ -20,7 +20,7 @@ func NewGetByIDHandler(deps dependencies.EquipmentTypeContainer) *GetByIDHandler
 }
 
 func (h *GetByIDHandler) Handle(q qry.EquipmentTypeGetByID) (*domain.EquipmentTypeDTO, error) {
-	eqType, err := h.repository.GetByID(q.ID, q.User)
+	eqType, err := h.repository.GetByID(q.User, q.ID)
 	if err != nil {
 		return nil, err
 	}

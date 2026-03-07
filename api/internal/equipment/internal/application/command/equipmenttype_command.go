@@ -1,6 +1,10 @@
 package cmd
 
-import authdom "octodome.com/api/internal/auth/domain"
+import (
+	"context"
+
+	authdom "octodome.com/api/internal/auth/domain"
+)
 
 type EquipmentTypeCreate struct {
 	Name        string
@@ -8,9 +12,10 @@ type EquipmentTypeCreate struct {
 }
 
 type EquipmentTypeUpdate struct {
+	UserContext authdom.UserContext
+	Ctx         context.Context
 	ID          uint
 	Name        string
-	UserContext authdom.UserContext
 }
 
 type EquipmentTypeDelete struct {

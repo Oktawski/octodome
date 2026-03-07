@@ -2,6 +2,7 @@ package hdl
 
 import (
 	"errors"
+
 	cmd "octodome.com/api/internal/equipment/internal/application/command"
 	"octodome.com/api/internal/equipment/internal/dependencies"
 	domain "octodome.com/api/internal/equipment/internal/domain/equipmenttype"
@@ -20,7 +21,7 @@ func NewUpdateHandler(deps dependencies.EquipmentTypeContainer) *UpdateHandler {
 }
 
 func (h *UpdateHandler) Handle(c cmd.EquipmentTypeUpdate) error {
-	if !h.validator.CanBeModified(c.ID, c.UserContext) {
+	if !h.validator.CanBeModified(c.UserContext, c.ID) {
 		return errors.New("equipment type cannot be updated")
 	}
 
@@ -30,5 +31,5 @@ func (h *UpdateHandler) Handle(c cmd.EquipmentTypeUpdate) error {
 		UserID: c.UserContext.ID,
 	}
 
-	return h.repo.Update(equipmentType)
+	return h.repo.Update(c.UserContext, c.Ctx, equipmentType)
 }

@@ -6,11 +6,11 @@ import (
 )
 
 type EquipmentTypeGetByID struct {
-	ID   uint
 	User authdom.UserContext
+	ID   uint
 }
 
 type EquipmentTypeGetList struct {
-	Pagination collection.Pagination
 	User       authdom.UserContext
+	Pagination collection.Pagination
 }

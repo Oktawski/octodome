@@ -2,6 +2,7 @@ package hdl
 
 import (
 	"errors"
+
 	cmd "octodome.com/api/internal/equipment/internal/application/command"
 	"octodome.com/api/internal/equipment/internal/dependencies"
 	domain "octodome.com/api/internal/equipment/internal/domain/equipmenttype"
@@ -21,7 +22,7 @@ func NewCreateHandler(deps dependencies.EquipmentTypeContainer) *CreateHandler {
 }
 
 func (h *CreateHandler) Handle(c cmd.EquipmentTypeCreate) error {
-	if !h.validator.CanBeCreated(c.Name, c.UserContext) {
+	if !h.validator.CanBeCreated(c.UserContext, c.Name) {
 		return errors.New("equipment type with this name already exists")
 	}
 

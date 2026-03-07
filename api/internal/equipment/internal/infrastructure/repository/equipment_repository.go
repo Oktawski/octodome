@@ -1,6 +1,8 @@
 package repo
 
 import (
+	"context"
+
 	authdom "octodome.com/api/internal/auth/domain"
 	"octodome.com/api/internal/core"
 	domain "octodome.com/api/internal/equipment/internal/domain/equipment"
@@ -19,9 +21,9 @@ func NewPgEquipmentRepository(db *gorm.DB) *pgEquipmentRepository {
 }
 
 func (r *pgEquipmentRepository) GetList(
+	userContext authdom.UserContext,
 	page int,
 	pageSize int,
-	user authdom.UserContext,
 ) ([]domain.Equipment, int64, error) {
 
 	var equipments []model.Equipment
@@ -29,7 +31,7 @@ func (r *pgEquipmentRepository) GetList(
 	var count int64
 
 	if dbError := r.db.
-		Where("user_id = ?", user.ID).
+		Where("user_id = ?", userContext.ID).
 		Scopes(core.Paginate(page, pageSize)).
 		Find(&equipments).
 		Count(&count).Error; dbError != nil {
@@ -47,14 +49,15 @@ func (r *pgEquipmentRepository) GetList(
 }
 
 func (r *pgEquipmentRepository) GetByID(
+	userContext authdom.UserContext,
 	id uint,
-	user authdom.UserContext,
 ) (*domain.Equipment, error) {
 
 	var eq *model.Equipment
 
+	// TODO: this doesn't include the equipment type 2026-03-07
 	if dbError := r.db.
-		Where("id = ? AND user_id = ?", id, user.ID).
+		Where("id = ? AND user_id = ?", id, userContext.ID).
 		First(&eq).Error; dbError != nil {
 		return nil, dbError
 	}
@@ -72,16 +75,23 @@ func (r *pgEquipmentRepository) Create(e *domain.Equipment) error {
 	return nil
 }
 
-func (r *pgEquipmentRepository) Update(e *domain.Equipment) error {
-	if dbError := r.db.
-		Model(&model.Equipment{}).
-		Where("id = ? AND user_id = ?", e.ID, e.UserID).
-		Updates(model.Equipment{
-			Category:    e.Category,
-			Description: e.Description,
-			Name:        e.Name,
-		}).Error; dbError != nil {
-		return dbError
+func (r *pgEquipmentRepository) Update(
+	userContext authdom.UserContext,
+	ctx context.Context,
+	e *domain.Equipment,
+) error {
+	equipment, err := gorm.G[model.Equipment](r.db).Where("id = ? AND user_id = ?", e.ID, e.UserID).First(ctx)
+	if err != nil {
+		return err
+	}
+
+	ct := equipment.Update(e.UserID, e)
+
+	if ct.HasChanges {
+		_, err = gorm.G[model.Equipment](r.db).Updates(ctx, equipment)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -98,9 +108,9 @@ func (r *pgEquipmentRepository) Delete(id uint) error {
 }
 
 func (r *pgEquipmentRepository) ExistsByNameAndType(
+	userContext authdom.UserContext,
 	name string,
 	equipmentTypeID uint,
-	userContext authdom.UserContext,
 ) bool {
 	var count int64
 
@@ -116,8 +126,8 @@ func (r *pgEquipmentRepository) ExistsByNameAndType(
 }
 
 func (r *pgEquipmentRepository) IsOwnedByUser(
-	equipmentID uint,
 	userContext authdom.UserContext,
+	equipmentID uint,
 ) bool {
 	var count int64
 

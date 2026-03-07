@@ -1,18 +1,24 @@
 package domain
 
-import authdom "octodome.com/api/internal/auth/domain"
+import (
+	"context"
+
+	authdom "octodome.com/api/internal/auth/domain"
+)
 
 type Repository interface {
-	GetList(page, pageSize int, user authdom.UserContext) ([]Equipment, int64, error)
-	GetByID(id uint, user authdom.UserContext) (*Equipment, error)
+	GetList(userContext authdom.UserContext, page int, pageSize int) ([]Equipment, int64, error)
+	GetByID(userContext authdom.UserContext, id uint) (*Equipment, error)
 	Create(equipment *Equipment) error
-	Update(equipment *Equipment) error
+
+	Update(userContext authdom.UserContext,
+		ctx context.Context,
+		equipment *Equipment) error
+
 	Delete(id uint) error
-
 	ExistsByNameAndType(
+		userContext authdom.UserContext,
 		name string,
-		equipmentTypeID uint,
-		userContext authdom.UserContext) bool
-
-	IsOwnedByUser(equipmentID uint, userContext authdom.UserContext) bool
+		equipmentTypeID uint) bool
+	IsOwnedByUser(userContext authdom.UserContext, equipmentID uint) bool
 }

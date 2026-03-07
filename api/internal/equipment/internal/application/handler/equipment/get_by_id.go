@@ -20,7 +20,7 @@ func (h *GetByIDHandler) Handle(q qry.EquipmentGetByID) (
 	*domain.EquipmentDTO,
 	error,
 ) {
-	equipment, err := h.repo.GetByID(q.ID, q.User)
+	equipment, err := h.repo.GetByID(q.User, q.ID)
 	if err != nil {
 		return nil, err
 	}

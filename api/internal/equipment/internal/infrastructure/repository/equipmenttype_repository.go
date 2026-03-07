@@ -1,11 +1,13 @@
 package repo
 
 import (
+	"context"
 	"errors"
+
 	authdom "octodome.com/api/internal/auth/domain"
-	"octodome.com/shared/collection"
 	domain "octodome.com/api/internal/equipment/internal/domain/equipmenttype"
 	"octodome.com/api/internal/equipment/internal/infrastructure/model"
+	"octodome.com/shared/collection"
 
 	"gorm.io/gorm"
 )
@@ -19,14 +21,15 @@ func NewPgEquipmentTypeRepository(db *gorm.DB) *pgEquipmentTypeRepository {
 }
 
 func (r *pgEquipmentTypeRepository) GetList(
+	userContext authdom.UserContext,
 	page int,
 	pageSize int,
-	user authdom.UserContext) ([]domain.EquipmentType, int64, error) {
+) ([]domain.EquipmentType, int64, error) {
 
 	var eqTypes []model.EquipmentType
 	var totalCount int64
 
-	query := r.db.Model(&model.EquipmentType{}).Where("user_id = ?", user.ID)
+	query := r.db.Model(&model.EquipmentType{}).Where("user_id = ?", userContext.ID)
 
 	query.Count(&totalCount)
 	query.Offset((page - 1) * pageSize).Limit(pageSize)
@@ -45,14 +48,14 @@ func (r *pgEquipmentTypeRepository) GetList(
 }
 
 func (r *pgEquipmentTypeRepository) GetByID(
+	userContext authdom.UserContext,
 	id uint,
-	user authdom.UserContext) (*domain.EquipmentType, error) {
-
+) (*domain.EquipmentType, error) {
 	var eqType *model.EquipmentType
 
 	if dbError := r.db.
 		Where("ID = ?", id).
-		Where("user_id = ?", user.ID).
+		Where("user_id = ?", userContext.ID).
 		First(&eqType).Error; dbError != nil {
 		return nil, dbError
 	}
@@ -70,7 +73,11 @@ func (r *pgEquipmentTypeRepository) Create(eq *domain.EquipmentType) error {
 	return nil
 }
 
-func (r *pgEquipmentTypeRepository) Update(eq *domain.EquipmentType) error {
+func (r *pgEquipmentTypeRepository) Update(
+	userContext authdom.UserContext,
+	ctx context.Context,
+	eq *domain.EquipmentType,
+) error {
 	equipmentModel := model.EquipmentTypeFromDomain(eq)
 
 	if err := r.db.Save(equipmentModel).Error; err != nil {
@@ -97,8 +104,8 @@ func (r *pgEquipmentTypeRepository) Delete(id uint) error {
 }
 
 func (r *pgEquipmentTypeRepository) ExistsByName(
-	name string,
 	userContext authdom.UserContext,
+	name string,
 ) bool {
 	var count int64
 
@@ -112,13 +119,13 @@ func (r *pgEquipmentTypeRepository) ExistsByName(
 	return count != 0
 }
 
-func (r *pgEquipmentTypeRepository) IsUsed(id uint, user authdom.UserContext) bool {
+func (r *pgEquipmentTypeRepository) IsUsed(userContext authdom.UserContext, id uint) bool {
 	var count int64
 
 	if err := r.db.Model(&model.Equipment{}).
 		Joins("JOIN equipment_types et ON equipment.type_id = et.id").
 		Where("type_id = ?", id).
-		Where("et.user_id = ?", user.ID).
+		Where("et.user_id = ?", userContext.ID).
 		Count(&count).Error; err != nil {
 		return false
 	}
@@ -126,12 +133,12 @@ func (r *pgEquipmentTypeRepository) IsUsed(id uint, user authdom.UserContext) bo
 	return count > 0
 }
 
-func (r *pgEquipmentTypeRepository) OwnedByUser(id uint, user authdom.UserContext) bool {
+func (r *pgEquipmentTypeRepository) OwnedByUser(userContext authdom.UserContext, id uint) bool {
 	var count int64
 
 	if err := r.db.Model(&model.EquipmentType{}).
 		Where("id = ?", id).
-		Where("user_id = ?", user.ID).
+		Where("user_id = ?", userContext.ID).
 		Count(&count).Error; err != nil {
 		return false
 	}

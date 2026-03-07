@@ -2,6 +2,7 @@ package hdl
 
 import (
 	"errors"
+
 	cmd "octodome.com/api/internal/equipment/internal/application/command"
 	"octodome.com/api/internal/equipment/internal/dependencies"
 	domain "octodome.com/api/internal/equipment/internal/domain/equipment"
@@ -20,7 +21,7 @@ func NewCreateHandler(deps dependencies.EquipmentContainer) *CreateHandler {
 }
 
 func (h *CreateHandler) Handle(c cmd.EquipmentCreate) error {
-	if !h.validator.CanBeCreated(c.Name, c.EquipmentTypeID, c.UserContext) {
+	if !h.validator.CanBeCreated(c.UserContext, c.Name, c.EquipmentTypeID) {
 		return errors.New("equipment cannot be created")
 	}
 

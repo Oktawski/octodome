@@ -3,8 +3,8 @@ package domain
 import authdom "octodome.com/api/internal/auth/domain"
 
 type Validator interface {
-	CanBeCreated(name string, userContext authdom.UserContext) bool
-	CanBeModified(id uint, userContext authdom.UserContext) bool
+	CanBeCreated(userContext authdom.UserContext, name string) bool
+	CanBeModified(userContext authdom.UserContext, id uint) bool
 }
 
 type validator struct {
@@ -16,20 +16,21 @@ func NewEquipmentTypeValidator(repo Repository) *validator {
 }
 
 func (v validator) CanBeCreated(
+	userContext authdom.UserContext,
 	name string,
-	userContext authdom.UserContext) bool {
+) bool {
 
-	return !v.repo.ExistsByName(name, userContext)
+	return !v.repo.ExistsByName(userContext, name)
 }
 
 func (v validator) CanBeModified(
-	id uint,
 	userContext authdom.UserContext,
+	id uint,
 ) bool {
-	if v.repo.IsUsed(id, userContext) {
+	if v.repo.IsUsed(userContext, id) {
 		return false
 	}
 
 	return userContext.HasRole(authdom.RoleAdmin) ||
-		v.repo.OwnedByUser(id, userContext)
+		v.repo.OwnedByUser(userContext, id)
 }

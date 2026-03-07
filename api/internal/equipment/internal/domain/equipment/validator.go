@@ -4,14 +4,14 @@ import authdom "octodome.com/api/internal/auth/domain"
 
 type Validator interface {
 	CanBeCreated(
+		userContext authdom.UserContext,
 		name string,
 		equipmentTypeID uint,
-		userContext authdom.UserContext,
 	) bool
 
 	CanBeModified(
-		equipmentID uint,
 		userContext authdom.UserContext,
+		equipmentID uint,
 	) bool
 }
 
@@ -24,16 +24,16 @@ func NewValidator(repo Repository) *validator {
 }
 
 func (v validator) CanBeCreated(
+	userContext authdom.UserContext,
 	name string,
 	equipmentTypeID uint,
-	userContext authdom.UserContext,
 ) bool {
-	return !v.repo.ExistsByNameAndType(name, equipmentTypeID, userContext)
+	return !v.repo.ExistsByNameAndType(userContext, name, equipmentTypeID)
 }
 
 func (v validator) CanBeModified(
-	equipmentID uint,
 	userContext authdom.UserContext,
+	equipmentID uint,
 ) bool {
-	return v.repo.IsOwnedByUser(equipmentID, userContext)
+	return v.repo.IsOwnedByUser(userContext, equipmentID)
 }
