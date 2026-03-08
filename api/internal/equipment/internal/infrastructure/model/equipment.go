@@ -29,6 +29,7 @@ func (e *Equipment) ToDomain() *domain.Equipment {
 		Description:     e.Description,
 		Category:        e.Category,
 		EquipmentTypeID: e.EquipmentTypeID,
+		EquipmentType:   *e.EquipmentType.ToDomain(),
 		UserID:          e.UserID,
 	}
 }

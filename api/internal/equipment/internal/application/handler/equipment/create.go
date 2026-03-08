@@ -1,8 +1,10 @@
 package hdl
 
 import (
+	"context"
 	"errors"
 
+	corecontext "octodome.com/api/internal/core/context"
 	cmd "octodome.com/api/internal/equipment/internal/application/command"
 	"octodome.com/api/internal/equipment/internal/dependencies"
 	domain "octodome.com/api/internal/equipment/internal/domain/equipment"
@@ -21,7 +23,9 @@ func NewCreateHandler(deps dependencies.EquipmentContainer) *CreateHandler {
 }
 
 func (h *CreateHandler) Handle(c cmd.EquipmentCreate) error {
-	if !h.validator.CanBeCreated(c.UserContext, c.Name, c.EquipmentTypeID) {
+	ctx := context.WithValue(c.Ctx, corecontext.UserIDKey, c.UserContext.ID)
+
+	if !h.validator.CanBeCreated(ctx, c.Name, c.EquipmentTypeID) {
 		return errors.New("equipment cannot be created")
 	}
 
@@ -31,5 +35,5 @@ func (h *CreateHandler) Handle(c cmd.EquipmentCreate) error {
 		UserID:          c.UserContext.ID,
 	}
 
-	return h.repo.Create(equipment)
+	return h.repo.Create(ctx, equipment)
 }

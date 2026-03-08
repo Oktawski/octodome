@@ -2,14 +2,16 @@ package repo
 
 import (
 	"context"
+	"errors"
 
-	authdom "octodome.com/api/internal/auth/domain"
 	"octodome.com/api/internal/core"
+	corecontext "octodome.com/api/internal/core/context"
 	domain "octodome.com/api/internal/equipment/internal/domain/equipment"
 	"octodome.com/api/internal/equipment/internal/infrastructure/model"
 	collection "octodome.com/shared/collection"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type pgEquipmentRepository struct {
@@ -21,21 +23,17 @@ func NewPgEquipmentRepository(db *gorm.DB) *pgEquipmentRepository {
 }
 
 func (r *pgEquipmentRepository) GetList(
-	userContext authdom.UserContext,
+	ctx context.Context,
 	page int,
 	pageSize int,
 ) ([]domain.Equipment, int64, error) {
+	query := gorm.G[model.Equipment](r.db).Where("user_id = ?", ctx.Value(corecontext.UserIDKey))
 
-	var equipments []model.Equipment
+	count, err := query.Count(ctx, "id")
+	equipments, err := query.Scopes(core.PaginateG(page, pageSize)).Find(ctx)
 
-	var count int64
-
-	if dbError := r.db.
-		Where("user_id = ?", userContext.ID).
-		Scopes(core.Paginate(page, pageSize)).
-		Find(&equipments).
-		Count(&count).Error; dbError != nil {
-		return nil, 0, dbError
+	if err != nil {
+		return nil, 0, err
 	}
 
 	equipmentList := collection.Map(
@@ -49,38 +47,41 @@ func (r *pgEquipmentRepository) GetList(
 }
 
 func (r *pgEquipmentRepository) GetByID(
-	userContext authdom.UserContext,
+	ctx context.Context,
 	id uint,
 ) (*domain.Equipment, error) {
+	equipment, err := gorm.G[model.Equipment](r.db).
+		Where("equipments.id = ?", id).
+		Joins(clause.LeftJoin.Association("EquipmentType"), nil).
+		First(ctx)
 
-	var eq *model.Equipment
-
-	// TODO: this doesn't include the equipment type 2026-03-07
-	if dbError := r.db.
-		Where("id = ? AND user_id = ?", id, userContext.ID).
-		First(&eq).Error; dbError != nil {
-		return nil, dbError
+	if err != nil {
+		return nil, err
 	}
 
-	return eq.ToDomain(), nil
+	return equipment.ToDomain(), nil
 }
 
-func (r *pgEquipmentRepository) Create(e *domain.Equipment) error {
+func (r *pgEquipmentRepository) Create(
+	ctx context.Context,
+	e *domain.Equipment,
+) error {
 	equipment := model.EquipmentFromDomain(e)
 
-	if dbError := r.db.Create(&equipment).Error; dbError != nil {
-		return dbError
+	if err := gorm.G[model.Equipment](r.db).Create(ctx, equipment); err != nil {
+		return err
 	}
 
 	return nil
 }
 
 func (r *pgEquipmentRepository) Update(
-	userContext authdom.UserContext,
 	ctx context.Context,
 	e *domain.Equipment,
 ) error {
-	equipment, err := gorm.G[model.Equipment](r.db).Where("id = ? AND user_id = ?", e.ID, e.UserID).First(ctx)
+	equipment, err := gorm.G[model.Equipment](r.db).
+		Where("id = ? AND user_id = ?", e.ID, e.UserID).
+		First(ctx)
 	if err != nil {
 		return err
 	}
@@ -97,18 +98,26 @@ func (r *pgEquipmentRepository) Update(
 	return nil
 }
 
-func (r *pgEquipmentRepository) Delete(id uint) error {
-	if dbError := r.db.
-		Model(&model.Equipment{}).
-		Where("ID = ?", id).
-		Delete(&model.Equipment{}).Error; dbError != nil {
-		return dbError
+func (r *pgEquipmentRepository) Delete(
+	ctx context.Context,
+	id uint,
+) error {
+	rowsAffected, err := gorm.G[model.Equipment](r.db).
+		Where("id = ?", id).
+		Delete(ctx)
+	if err != nil {
+		return err
 	}
+
+	if rowsAffected == 0 {
+		return errors.New("equipment not found or not owned by the user")
+	}
+
 	return nil
 }
 
 func (r *pgEquipmentRepository) ExistsByNameAndType(
-	userContext authdom.UserContext,
+	ctx context.Context,
 	name string,
 	equipmentTypeID uint,
 ) bool {
@@ -117,7 +126,7 @@ func (r *pgEquipmentRepository) ExistsByNameAndType(
 	if err := r.db.Model(&model.Equipment{}).
 		Where("name = ?", name).
 		Where("type_id = ?", equipmentTypeID).
-		Where("user_id = ?", userContext.ID).
+		Where("user_id = ?", ctx.Value(corecontext.UserIDKey)).
 		Count(&count).Error; err != nil {
 		return false
 	}
@@ -126,14 +135,14 @@ func (r *pgEquipmentRepository) ExistsByNameAndType(
 }
 
 func (r *pgEquipmentRepository) IsOwnedByUser(
-	userContext authdom.UserContext,
+	ctx context.Context,
 	equipmentID uint,
 ) bool {
 	var count int64
 
 	if err := r.db.Model(&model.Equipment{}).
 		Where("id = ?", equipmentID).
-		Where("user_id = ?", userContext.ID).
+		Where("user_id = ?", ctx.Value(corecontext.UserIDKey)).
 		Count(&count).Error; err != nil {
 		return false
 	}

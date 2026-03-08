@@ -1,8 +1,10 @@
 package hdl
 
 import (
+	"context"
 	"errors"
 
+	corecontext "octodome.com/api/internal/core/context"
 	cmd "octodome.com/api/internal/equipment/internal/application/command"
 	"octodome.com/api/internal/equipment/internal/dependencies"
 	domain "octodome.com/api/internal/equipment/internal/domain/equipment"
@@ -21,9 +23,11 @@ func NewDeleteHandler(deps dependencies.EquipmentContainer) *DeleteHandler {
 }
 
 func (h *DeleteHandler) Handle(c cmd.EquipmentDelete) error {
-	if !h.validator.CanBeModified(c.UserContext, c.ID) {
+	ctx := context.WithValue(c.Ctx, corecontext.UserIDKey, c.UserContext.ID)
+
+	if !h.validator.CanBeModified(ctx, c.ID) {
 		return errors.New("equipment cannot be deleted")
 	}
 
-	return h.repo.Delete(c.ID)
+	return h.repo.Delete(ctx, c.ID)
 }

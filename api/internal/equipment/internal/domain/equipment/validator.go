@@ -1,16 +1,18 @@
 package domain
 
-import authdom "octodome.com/api/internal/auth/domain"
+import (
+	"context"
+)
 
 type Validator interface {
 	CanBeCreated(
-		userContext authdom.UserContext,
+		ctx context.Context,
 		name string,
 		equipmentTypeID uint,
 	) bool
 
 	CanBeModified(
-		userContext authdom.UserContext,
+		ctx context.Context,
 		equipmentID uint,
 	) bool
 }
@@ -24,16 +26,16 @@ func NewValidator(repo Repository) *validator {
 }
 
 func (v validator) CanBeCreated(
-	userContext authdom.UserContext,
+	ctx context.Context,
 	name string,
 	equipmentTypeID uint,
 ) bool {
-	return !v.repo.ExistsByNameAndType(userContext, name, equipmentTypeID)
+	return !v.repo.ExistsByNameAndType(ctx, name, equipmentTypeID)
 }
 
 func (v validator) CanBeModified(
-	userContext authdom.UserContext,
+	ctx context.Context,
 	equipmentID uint,
 ) bool {
-	return v.repo.IsOwnedByUser(userContext, equipmentID)
+	return v.repo.IsOwnedByUser(ctx, equipmentID)
 }

@@ -1,6 +1,9 @@
 package hdl
 
 import (
+	"context"
+
+	corecontext "octodome.com/api/internal/core/context"
 	qry "octodome.com/api/internal/equipment/internal/application/query"
 	"octodome.com/api/internal/equipment/internal/dependencies"
 	domain "octodome.com/api/internal/equipment/internal/domain/equipment"
@@ -20,7 +23,8 @@ func (h *GetByIDHandler) Handle(q qry.EquipmentGetByID) (
 	*domain.EquipmentDTO,
 	error,
 ) {
-	equipment, err := h.repo.GetByID(q.User, q.ID)
+	ctx := context.WithValue(q.Ctx, corecontext.UserIDKey, q.UserContext.ID)
+	equipment, err := h.repo.GetByID(ctx, q.ID)
 	if err != nil {
 		return nil, err
 	}

@@ -57,7 +57,7 @@ func (c *equipmentController) GetEquipmentList(w http.ResponseWriter, r *http.Re
 	user, _ := corehttp.GetUserContext(r)
 	pagination := sharedhttp.GetPagination(r)
 
-	query := qry.EquipmentGetList{Pagination: pagination, User: *user}
+	query := qry.EquipmentGetList{Ctx: r.Context(), UserContext: *user, Pagination: pagination}
 
 	equipments, totalCount, err := c.getListHandler.Handle(query)
 	if err != nil {
@@ -77,7 +77,7 @@ func (c *equipmentController) GetEquipment(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	query := qry.EquipmentGetByID{ID: equipmentID, User: *user}
+	query := qry.EquipmentGetByID{Ctx: r.Context(), UserContext: *user, ID: equipmentID}
 
 	equipment, err := c.getByIDHandler.Handle(query)
 	if err != nil {
@@ -98,6 +98,7 @@ func (c *equipmentController) CreateEquipment(w http.ResponseWriter, r *http.Req
 	}
 
 	command := cmd.EquipmentCreate{
+		Ctx:             r.Context(),
 		UserContext:     *user,
 		Name:            request.Name,
 		Description:     request.Description,
@@ -127,6 +128,7 @@ func (c *equipmentController) UpdateEquipment(w http.ResponseWriter, r *http.Req
 	}
 
 	command := cmd.EquipmentUpdate{
+		Ctx:         r.Context(),
 		UserContext: *user,
 		ID:          equipmentID,
 		Name:        dto.Name,
@@ -150,8 +152,9 @@ func (c *equipmentController) DeleteEquipment(w http.ResponseWriter, r *http.Req
 	}
 
 	command := cmd.EquipmentDelete{
-		ID:          equipmentID,
+		Ctx:         r.Context(),
 		UserContext: *user,
+		ID:          equipmentID,
 	}
 	if err := c.deleteHandler.Handle(command); err != nil {
 		sharedhttp.WriteJSONError(w, http.StatusConflict, "could not delete equipment")

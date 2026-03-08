@@ -1,6 +1,9 @@
 package hdl
 
 import (
+	"context"
+
+	corecontext "octodome.com/api/internal/core/context"
 	qry "octodome.com/api/internal/equipment/internal/application/query"
 	"octodome.com/api/internal/equipment/internal/dependencies"
 	domain "octodome.com/api/internal/equipment/internal/domain/equipment"
@@ -17,7 +20,8 @@ func NewGetListHandler(deps dependencies.EquipmentContainer) *GetListHandler {
 }
 
 func (h *GetListHandler) Handle(q qry.EquipmentGetList) ([]domain.EquipmentDTO, int64, error) {
-	equipments, totalCount, err := h.repo.GetList(q.User, q.Pagination.Page, q.Pagination.PageSize)
+	ctx := context.WithValue(q.Ctx, corecontext.UserIDKey, q.UserContext.ID)
+	equipments, totalCount, err := h.repo.GetList(ctx, q.Pagination.Page, q.Pagination.PageSize)
 	if err != nil {
 		return nil, 0, err
 	}

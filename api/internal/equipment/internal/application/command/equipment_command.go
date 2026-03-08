@@ -7,6 +7,7 @@ import (
 )
 
 type EquipmentCreate struct {
+	Ctx             context.Context
 	UserContext     auth.UserContext
 	Name            string
 	Description     string
@@ -15,8 +16,8 @@ type EquipmentCreate struct {
 }
 
 type EquipmentUpdate struct {
-	UserContext auth.UserContext
 	Ctx         context.Context
+	UserContext auth.UserContext
 	ID          uint
 	Name        string
 	Description string
@@ -24,6 +25,7 @@ type EquipmentUpdate struct {
 }
 
 type EquipmentDelete struct {
-	ID          uint
+	Ctx         context.Context
 	UserContext auth.UserContext
+	ID          uint
 }
