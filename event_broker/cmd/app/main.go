@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
 	"net/http"
 	"os"
+	"time"
 
+	"octodome.com/eventbroker/application"
 	infra "octodome.com/eventbroker/infrastructure"
 	"octodome.com/eventbroker/presentation"
 
@@ -26,8 +29,40 @@ func main() {
 
 	infra.Migrate(db)
 
+	registry := infra.NewHandlerRegistry(db)
+	dispatcher := infra.NewEventDispatcher()
+	eventRepository := infra.NewEventRepository(db)
+	stateManager := infra.NewStateManager(db)
+
+	sweeper := infra.NewSweeper(eventRepository, registry, dispatcher)
+
+	forward := application.NewForward(eventRepository, registry, dispatcher)
+	updateState := application.NewUpdateState(stateManager)
+	getEvent := application.NewGetEvent(eventRepository)
+	registerHandler := application.NewRegisterHandler(registry)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// TODO: make cleaner goroutine that will mark processing events as failed after 5 minutes
+	go func() {
+		ticker := time.NewTicker(30 * time.Second)
+		defer ticker.Stop()
+		log.Printf("Sweeper started with interval %s", 30*time.Second)
+		for {
+			select {
+			case <-ticker.C:
+				if err := sweeper.Sweep(ctx); err != nil {
+					log.Printf("Sweep failed: %v", err)
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+
 	r := chi.NewRouter()
-	presentation.Initialize(r, db)
+	presentation.RegisterEventRoutes(r, forward, updateState, getEvent, registerHandler)
 
 	port := os.Getenv("PORT")
 	if port == "" {

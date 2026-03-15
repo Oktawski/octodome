@@ -1,4 +1,4 @@
-package infra
+package model
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 	"octodome.com/shared/events"
 )
 
-type event struct {
+type Event struct {
 	ID        uint            `json:"id"`
 	Type      string          `json:"type"`
 	Payload   json.RawMessage `gorm:"type:jsonb"`
@@ -17,7 +17,7 @@ type event struct {
 	Status    string          `json:"status"`
 }
 
-func (e *event) Pending() error {
+func (e *Event) Pending() error {
 	if e.Status == string(events.EventStatusFailed) ||
 		e.Status == string(events.EventStatusProcessing) {
 		e.Status = string(events.EventStatusPending)
@@ -27,7 +27,7 @@ func (e *event) Pending() error {
 	return errors.New("cannot mark event as pending, it must be failed or processing")
 }
 
-func (e *event) Processed() error {
+func (e *Event) Processed() error {
 	if e.Status == string(events.EventStatusProcessing) {
 		e.Status = string(events.EventStatusProcessed)
 		e.UpdatedAt = time.Now()
@@ -36,7 +36,7 @@ func (e *event) Processed() error {
 	return errors.New("cannot mark event as processed, it is not processing")
 }
 
-func (e *event) Failed() error {
+func (e *Event) Failed() error {
 	if e.Status == string(events.EventStatusProcessing) {
 		e.Status = string(events.EventStatusFailed)
 		e.UpdatedAt = time.Now()
@@ -45,7 +45,7 @@ func (e *event) Failed() error {
 	return errors.New("cannot mark event as failed, it is not processing")
 }
 
-func (e *event) Processing() error {
+func (e *Event) Processing() error {
 	if e.Status == string(events.EventStatusPending) ||
 		e.Status == string(events.EventStatusFailed) {
 		e.Status = string(events.EventStatusProcessing)
@@ -55,6 +55,6 @@ func (e *event) Processing() error {
 	return errors.New("cannot mark event as processing, it must be pending or failed")
 }
 
-func (e *event) TableName() string {
+func (e *Event) TableName() string {
 	return "events"
 }

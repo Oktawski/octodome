@@ -34,6 +34,18 @@
             ]
         },
         {
+            "name": "Run Registration Service",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/registration_service",
+            "env": {
+                "EVENT_BROKER_URL": "http://localhost:8081",
+                "SERVICE_URL": "http://localhost:8082",
+                "PORT": "8082"
+            }
+        },
+        {
             "name": "Attach to Registration Service (Docker)",
             "type": "go",
             "request": "attach",

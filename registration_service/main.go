@@ -1,57 +1,37 @@
 package main
 
 import (
-	"encoding/json"
 	"log"
+	"net/http"
 	"os"
-	"time"
 
 	"octodome.com/shared/events"
 )
 
 func main() {
 	brokerURL := os.Getenv("EVENT_BROKER_URL")
+	serviceURL := os.Getenv("SERVICE_URL")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
 	eventClient := events.NewClient(brokerURL)
-	ticker := time.NewTicker(5 * time.Second)
 
-	defer ticker.Stop()
-
-	processEvent(*eventClient)
-	for range ticker.C {
-		processEvent(*eventClient)
+	if err := eventClient.RegisterHandler(
+		"registration_service",
+		events.UserRegistered{}.GetEventType(),
+		serviceURL+"/events",
+	); err != nil {
+		log.Fatalf("Failed to register handler with event broker: %v", err)
 	}
-}
+	log.Printf("Registered handler for %s at %s/events", events.UserRegistered{}.GetEventType(), serviceURL)
 
-func processEvent(eventClient events.Client) {
-	id, event, err := eventClient.GetEvent(events.UserRegistered{}.GetEventType())
-	if err != nil {
-		log.Default().Printf("Error getting event %s: %v", events.UserRegistered{}.GetEventType(), err)
-		return
-	}
+	router := newRouter(*eventClient)
 
-	var userRegisteredPayload events.UserRegistered
-	err = json.Unmarshal(event, &userRegisteredPayload)
-	if err != nil {
-		err := eventClient.MarkEventAsFailed(id)
-		log.Default().Printf("Error unmarshalling event %s: %v", events.UserRegistered{}.GetEventType(), err)
-		return
-	}
-
-	processed, err := sendEmail(userRegisteredPayload)
-
-	if err != nil {
-		log.Fatalf("Error processing event %s: %v", events.UserRegistered{}.GetEventType(), err)
-		err := eventClient.MarkEventAsFailed(id)
-		if err != nil {
-			log.Default().Print(err.Error())
-		}
-	}
-
-	if processed {
-		err := eventClient.MarkEventAsProcessed(id)
-		if err != nil {
-			log.Default().Print(err.Error())
-		}
+	log.Printf("Starting registration service on :%s", port)
+	if err := http.ListenAndServe(":"+port, router); err != nil {
+		log.Fatalf("Server failed: %v", err)
 	}
 }
 
