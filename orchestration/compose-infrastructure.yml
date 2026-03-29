@@ -103,6 +103,8 @@ services:
     restart: unless-stopped
     ports:
       - "2347:2347"
+    env_file:
+      - ../.env
     environment:
       EVENT_BROKER_URL: "http://event-broker:8990"
       SERVICE_URL: "http://registration-service:8080"

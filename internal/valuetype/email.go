@@ -16,7 +16,6 @@ const (
 	emailInvalidFormatErr     = "invalid email format"
 	emailInvalidCharactersErr = "email contains invalid characters"
 	emailAtSymbolCountErr     = "email must contain exactly one @ symbol"
-	emailDotSymbolCountErr    = "email must contain exactly one dot"
 )
 
 func NewEmail(address string) (Email, error) {
@@ -43,9 +42,6 @@ func isValidEmail(address string) []error {
 		return append(errs, errors.New(emailTooLongErr))
 	}
 	if errs := hasInvalidAtSymbolUsage(errs, address); len(errs) > 0 {
-		return errs
-	}
-	if errs := hasInvalidDotUsage(errs, address); len(errs) > 0 {
 		return errs
 	}
 
@@ -92,13 +88,6 @@ func hasInvalidAtSymbolUsage(errs []error, address string) []error {
 	parts := strings.Split(address, "@")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
 		return append(errs, errors.New(emailInvalidFormatErr))
-	}
-	return errs
-}
-
-func hasInvalidDotUsage(errs []error, address string) []error {
-	if strings.Count(address, ".") != 1 {
-		return append(errs, errors.New(emailDotSymbolCountErr))
 	}
 	return errs
 }
