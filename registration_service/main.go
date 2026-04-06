@@ -55,9 +55,14 @@ func sendEmail(p events.UserRegistered) (bool, error) {
 		return false, errors.New("EMAIL_SMTP_USER is required")
 	}
 
+	name := p.Name
+	if p.Name == "" {
+		name = string(p.Email)
+	}
+
 	var body strings.Builder
 	body.WriteString("Hi ")
-	body.WriteString(p.Name)
+	body.WriteString(name)
 	body.WriteString(",\n\nYour account has been registered successfully.\n\n")
 	body.WriteString("Thanks,\nOctodome\n")
 
