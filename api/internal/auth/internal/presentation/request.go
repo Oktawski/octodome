@@ -1,8 +1,17 @@
 package http
 
-type AuthRequest struct {
+type AuthenticateCredentialsRequest struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type SendMagicCodeRequest struct {
+	Email string `json:"email"`
+}
+
+type AuthenticateMagicCodeRequest struct {
+	Email string `json:"email"`
+	Code  string `json:"code"`
 }
 
 type AssignRoleRequest struct {

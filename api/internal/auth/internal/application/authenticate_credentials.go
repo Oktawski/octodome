@@ -14,7 +14,7 @@ type AuthenticateCommand struct {
 	Password string
 }
 
-type AuthenticateHandler interface {
+type AuthenticateCredentialsHandler interface {
 	Handle(authReq AuthenticateCommand) (string, error)
 }
 
@@ -24,7 +24,7 @@ type authenticateHandler struct {
 	passwordHasher domain.PasswordHasher
 }
 
-func NewAuthenticateHandler(deps dependencies.Container) AuthenticateHandler {
+func NewAuthenticateCredentialsHandler(deps dependencies.Container) AuthenticateCredentialsHandler {
 	return &authenticateHandler{
 		userReader:     deps.UserReader,
 		tokenGenerator: deps.TokenGenerator,

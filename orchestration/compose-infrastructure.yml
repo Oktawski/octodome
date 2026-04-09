@@ -88,17 +88,17 @@ services:
   registration-service:
     build:
       context: ..
-      dockerfile: registration_service/Dockerfile.debug
+      dockerfile: send_email_service/Dockerfile.debug
     develop:
       watch:
         - action: rebuild
-          path: ../registration_service
+          path: ../send_email_service
         - action: rebuild
           path: ../internal
         - action: rebuild
-          path: ../registration_service/go.mod
+          path: ../send_email_service/go.mod
         - action: rebuild
-          path: ../registration_service/go.sum
+          path: ../send_email_service/go.sum
     container_name: octodome-registration-service
     restart: unless-stopped
     ports:

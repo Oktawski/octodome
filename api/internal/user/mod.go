@@ -20,7 +20,7 @@ func Initialize(r chi.Router, db *gorm.DB) {
 
 func initializeController(db *gorm.DB) *http.UserController {
 	userRepo := infra.NewPgUserRepository(db)
-	eventsClient := events.NewClient("http://event-broker:8990/events")
+	eventsClient := events.NewClient("http://event-broker:8990")
 
 	userCreateHandler := user.NewRegisterHandler(userRepo, *eventsClient)
 	userGetByID := user.NewUserGetByIDHandler(userRepo)

@@ -1,4 +1,4 @@
-module octodome.com/registration
+module octodome.com/send_email_service
 
 go 1.26.0
 

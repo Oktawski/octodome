@@ -4,14 +4,17 @@ import (
 	"octodome.com/api/internal/auth/internal/domain"
 	"octodome.com/api/internal/auth/internal/domain/repository"
 	"octodome.com/api/internal/auth/internal/domain/validator"
+	"octodome.com/shared/events"
 )
 
 type Container struct {
-	UserReader     repository.UserReader
-	RoleRepository repository.RoleRepository
-	TokenGenerator domain.AuthTokenGenerator
-	PasswordHasher domain.PasswordHasher
-	RoleValidator  validator.Role
+	UserReader          repository.UserReader
+	RoleRepository      repository.RoleRepository
+	TokenGenerator      domain.AuthTokenGenerator
+	PasswordHasher      domain.PasswordHasher
+	RoleValidator       validator.Role
+	MagicCodeRepository repository.MagicCode
+	EventsClient        events.Client
 }
 
 func NewContainer(
@@ -20,12 +23,16 @@ func NewContainer(
 	tokenGenerator domain.AuthTokenGenerator,
 	passwordHasher domain.PasswordHasher,
 	roleValidator validator.Role,
+	magicCodeRepository repository.MagicCode,
+	eventsClient *events.Client, // TODO: change to interface
 ) Container {
 	return Container{
-		UserReader:     userReader,
-		RoleRepository: roleRepository,
-		TokenGenerator: tokenGenerator,
-		PasswordHasher: passwordHasher,
-		RoleValidator:  roleValidator,
+		UserReader:          userReader,
+		RoleRepository:      roleRepository,
+		TokenGenerator:      tokenGenerator,
+		PasswordHasher:      passwordHasher,
+		RoleValidator:       roleValidator,
+		MagicCodeRepository: magicCodeRepository,
+		EventsClient:        *eventsClient,
 	}
 }

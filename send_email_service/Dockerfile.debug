@@ -6,12 +6,12 @@ WORKDIR /app
 
 COPY ./internal ./internal
 
-COPY registration_service/go.mod registration_service/go.sum ./registration_service/
+COPY send_email_service/go.mod send_email_service/go.sum ./send_email_service/
 
-WORKDIR /app/registration_service
+WORKDIR /app/send_email_service
 RUN go mod download
 
-COPY registration_service/ ./
+COPY send_email_service/ ./
 
 RUN CGO_ENABLED=0 GOOS=linux go build -gcflags="all=-N -l" -o /app-binary .
 

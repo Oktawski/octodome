@@ -72,8 +72,7 @@ func (c *Client) PublishEvent(eventType EventType, payload EventType) error {
 		Payload:   payload,
 	}
 
-	err := c.client.Post("", request, nil)
-	return err
+	return c.client.Post("/events/", request, nil)
 }
 
 func (c *Client) GetEvent(eventType EventType) (uint, json.RawMessage, error) {
